@@ -20,11 +20,11 @@ const highlights = [
   },
 ];
 
-const stats = [
-  { label: "Members", value: "80+" },
-  { label: "Hours invested", value: "67k" },
-  { label: "Meetings", value: "3" },
-];
+// const stats = [
+//   { label: "Members", value: "80+" },
+//   { label: "Hours invested", value: "67k" },
+//   { label: "Meetings", value: "3" },
+// ];
 
 const discordServerId = process.env.NEXT_PUBLIC_DISCORD_SERVER_ID;
 const discordInvite = process.env.NEXT_PUBLIC_DISCORD_INVITE;
@@ -107,7 +107,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3" role="list">
+          {/* <div className="grid gap-4 sm:grid-cols-3" role="list">
             {stats.map((stat) => (
               <div
                 key={stat.label}
@@ -117,7 +117,7 @@ export default async function Home() {
                 <p className="mt-2 text-3xl font-semibold text-white">{stat.value}</p>
               </div>
             ))}
-          </div>
+          </div> */}
 
           {discordServerId && (
             <div className="mt-8 rounded-2xl border border-purple-900/50 bg-gradient-to-br from-[#0f0b16] via-[#0b0812] to-black p-6 shadow-xl shadow-purple-900/30">
