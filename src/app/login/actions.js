@@ -42,3 +42,12 @@ export async function signup(formData) {
   revalidatePath('/', 'layout')
   redirect('/account')
 }
+
+export async function sendReset(formData) {
+  const email = formData.get('email');
+  const supabase = await createClient();
+
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
+  });
+}
