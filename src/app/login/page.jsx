@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ResetRequest from "./reset-request";
 import { login, signup } from "./actions";
 
 export default function LoginPage() {
@@ -57,6 +58,8 @@ export default function LoginPage() {
               </button>
             </div>
           </form>
+
+          <ResetRequest />
 
           <div className="mt-6 text-center">
             <Link

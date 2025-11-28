@@ -43,11 +43,33 @@ export async function signup(formData) {
   redirect('/account')
 }
 
-export async function sendReset(formData) {
-  const email = formData.get('email');
-  const supabase = await createClient();
+export async function sendReset(prevState, formData) {
+  const email = String(formData.get('resetEmail') || '').trim()
+  const supabase = await createClient()
 
-  await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
-  });
+  if (!email) {
+    return { type: 'error', message: 'Please enter your email.' }
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailPattern.test(email)) {
+    return { type: 'error', message: 'Enter a valid email address.' }
+  }
+
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : '')
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: siteUrl ? `${siteUrl}/reset-password` : undefined,
+  })
+
+  if (error) {
+    return { type: 'error', message: 'Could not send reset email. Try again in a moment.' }
+  }
+
+  return {
+    type: 'success',
+    message: 'If that account exists, a reset link is on the way.',
+  }
 }
