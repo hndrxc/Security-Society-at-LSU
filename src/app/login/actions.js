@@ -60,8 +60,14 @@ export async function sendReset(prevState, formData) {
     process.env.NEXT_PUBLIC_SITE_URL ||
     (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : '')
 
+  if (!siteUrl) {
+    return { type: 'error', message: 'Site URL is not configured.' }
+  }
+
+  const redirectTo = `${siteUrl}/auth/callback?next=${encodeURIComponent('/reset-password')}`
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: siteUrl ? `${siteUrl}/reset-password` : undefined,
+    redirectTo,
   })
 
   if (error) {
