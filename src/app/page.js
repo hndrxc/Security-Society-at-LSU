@@ -53,7 +53,7 @@ export default async function Home() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
               Security Society at LSU
             </p>
-            <p className="text-base font-semibold text-slate-100">LSU&apos;s Only Cybersecurity Club</p>
+            <p className="text-base font-semibold text-slate-100">LSU&apos;s Best Cybersecurity Club</p>
           </div>
         </div>
 
@@ -87,8 +87,10 @@ export default async function Home() {
               Hello Hacker!
             </h1>
             <p className="text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-              We equip students with the technical skills needed in today&apos;s cybersecurity landscape and provide job
-              opportunities by connecting them with industry professionals. Join us from 6:00-7:30 in PFT 1240 on
+              Welcome to the Security Society at LSU. We are are Cybersecurity club that aims to equip students with the technical skills needed in today&apos;s cybersecurity landscape,and provide job opportunities by connecting them with industry professionals.
+            </p>
+            <p className="text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
+              Join us from 6:00-7:30 in PFT 1240 on
               Tuesdays, in PFT 1212 on Fridays, or email us at securitysocietylsu@protonmail.com!
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start sm:gap-4">
