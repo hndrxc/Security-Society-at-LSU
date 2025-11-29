@@ -170,7 +170,7 @@ export default function AboutPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
               Security Society at LSU
             </p>
-            <p className="text-base font-semibold text-slate-100">LSU&apos;s Only Cybersecurity Club</p>
+            <p className="text-base font-semibold text-slate-100">LSU&apos;s Best Cybersecurity Club</p>
           </div>
         </div>
 
