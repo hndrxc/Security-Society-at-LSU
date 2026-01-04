@@ -1,7 +1,7 @@
 import Link from "next/link";
 import LogoBadge from "@/components/LogoBadge";
 import { createClient } from "../../utils/supabase/server";
-
+import SnowfallEffect from "@/components/SnowfallEffect";
 const highlights = [
   {
     title: "Community-first programs",
@@ -51,10 +51,11 @@ export default async function Home() {
   const accountHref = user ? "/account" : "/login";
   const accountLabel = user ? (profile?.username || "Account") : "Login";
   const isAdmin = profile?.is_admin || false;
-  const displayName = profile?.full_name || profile?.username || "Hacker";
+  const displayName = profile?.username || "Hacker";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-[#0d0a14] to-black text-slate-100 cyber-grid">
+      <SnowfallEffect />
       {/* Animated blur orbs */}
       <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-purple-700/40 blur-3xl" style={{ animation: 'slow-pulse 8s ease-in-out infinite' }} />
       <div className="pointer-events-none absolute bottom-0 right-[-80px] h-72 w-72 rounded-full bg-amber-500/30 blur-3xl" style={{ animation: 'slow-pulse 10s ease-in-out infinite 1s' }} />
@@ -129,7 +130,7 @@ export default async function Home() {
           <div className="relative flex flex-col gap-5 text-center sm:max-w-3xl sm:gap-6 sm:text-left" id="about">
             {/* Terminal prompt */}
             <div className="font-terminal text-xs text-purple-400">
-              <span className="text-amber-400">root@ssl</span>
+              <span className="text-amber-400">{displayName}@ssl</span>
               <span className="text-slate-500">:</span>
               <span className="text-purple-300">~</span>
               <span className="text-slate-500">$</span>
