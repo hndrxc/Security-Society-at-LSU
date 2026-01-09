@@ -19,7 +19,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://*.supabase.co",
               "font-src 'self'",
-              "frame-src https://discord.com",
+              "frame-src https://discord.com https://discordapp.com",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
               "media-src 'self'",
               "object-src 'none'",
