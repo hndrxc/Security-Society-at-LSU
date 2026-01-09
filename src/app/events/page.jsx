@@ -11,7 +11,7 @@ export default async function EventsPage() {
 
   const { data: events, error } = await supabase
     .from("events")
-    .select("id,title,description,starts_at,ends_at,location")
+    .select("id,title,description,starts_at,ends_at,location,timezone")
     .eq("is_visible", true)
     .gte("ends_at", new Date().toISOString())
     .order("starts_at", { ascending: true });
@@ -106,12 +106,12 @@ export default async function EventsPage() {
                     <div className="flex flex-col items-start gap-1 font-semibold text-slate-200 sm:items-end">
                       <div className="font-terminal text-xs">
                         <span className="text-[#39ff14]">START:</span>
-                        <span className="ml-2 text-slate-300">{new Date(event.starts_at).toLocaleString()}</span>
+                        <span className="ml-2 text-slate-300">{new Date(event.starts_at).toLocaleString("en-US", { timeZone: event.timezone || "America/Chicago" })}</span>
                       </div>
                       {event.ends_at && (
                         <div className="font-terminal text-xs text-slate-400">
                           <span className="text-slate-500">END:</span>
-                          <span className="ml-2">{new Date(event.ends_at).toLocaleString()}</span>
+                          <span className="ml-2">{new Date(event.ends_at).toLocaleString("en-US", { timeZone: event.timezone || "America/Chicago" })}</span>
                         </div>
                       )}
                     </div>
