@@ -82,11 +82,13 @@ export default async function EventsPage() {
                 >
                   {/* Timeline dot */}
                   <div className="absolute -left-[29px] top-6 h-3 w-3 rounded-full border-2 border-purple-900 bg-amber-400 shadow-lg shadow-amber-400/50" />
-
-                  {/* Classification badge */}
-                  <span className="font-terminal absolute right-3 bottom-3 rounded bg-purple-800/50 px-2 py-1 text-[10px] text-amber-200">
+                  
+                  {/* currently not used due to lack of space */}
+                  {/* Classification badge */} 
+                  {/* <span className="font-terminal absolute left-2 top-2 rounded bg-purple-800/50 px-2 py-1 text-[10px] text-amber-200">
                     EVENT-{String(index + 1).padStart(3, '0')}
-                  </span>
+                  </span> */
+                  }
 
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex flex-col gap-2">
