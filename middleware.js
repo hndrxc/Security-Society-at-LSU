@@ -41,7 +41,16 @@ function isRateLimited(key, maxRequests) {
 }
 
 export async function middleware(request) {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
+  // Improved IP detection for rate limiting
+  // Try multiple header sources for proxied requests
+  const ip = (
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('cf-connecting-ip') ||
+    request.headers.get('x-real-ip') ||
+    request.headers.get('x-client-ip') ||
+    'unknown'
+  )
+
   const path = request.nextUrl.pathname
   const key = getRateLimitKey(ip, path)
 

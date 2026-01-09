@@ -5,7 +5,11 @@ import { createClient } from '../../../../utils/supabase/server'
 export async function GET(request) {
   const url = new URL(request.url)
   const code = url.searchParams.get('code')
-  const next = url.searchParams.get('next') || '/reset-password'
+
+  // Validate 'next' parameter to prevent open redirect attacks
+  const allowedNextRoutes = ['/reset-password', '/account', '/ctf', '/']
+  const requestedNext = url.searchParams.get('next')
+  const next = allowedNextRoutes.includes(requestedNext) ? requestedNext : '/reset-password'
 
   const redirectUrl = new URL(next, url.origin)
 

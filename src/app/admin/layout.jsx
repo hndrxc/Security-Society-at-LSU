@@ -63,6 +63,12 @@ export default async function AdminLayout({ children }) {
             Dashboard
           </Link>
           <Link
+            href="/admin/events"
+            className="font-terminal border-b-2 border-transparent px-4 py-3 text-xs uppercase tracking-wider text-slate-400 transition-colors hover:border-purple-500/50 hover:text-slate-200"
+          >
+            Events
+          </Link>
+          <Link
             href="/admin/ctf/competitions"
             className="font-terminal border-b-2 border-transparent px-4 py-3 text-xs uppercase tracking-wider text-slate-400 transition-colors hover:border-purple-500/50 hover:text-slate-200"
           >

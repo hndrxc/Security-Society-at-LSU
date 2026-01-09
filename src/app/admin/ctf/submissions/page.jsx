@@ -1,16 +1,39 @@
 // src/app/admin/ctf/submissions/page.jsx
+import { redirect } from "next/navigation";
 import { createClient } from "../../../../../utils/supabase/server";
+
+// Helper to verify admin authorization
+async function requireAdmin() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile?.is_admin) {
+    redirect("/");
+  }
+
+  return supabase;
+}
 
 export default async function SubmissionsPage({ searchParams }) {
   const params = await searchParams;
-  const supabase = await createClient();
+  const supabase = await requireAdmin();
 
   const filter = params.filter || 'all';
   const page = parseInt(params.page || '1', 10);
   const limit = 50;
   const offset = (page - 1) * limit;
 
-  // Build query
+  // Build query - fetch submissions without profiles join (no direct FK relationship)
   let query = supabase
     .from("ctf_submissions")
     .select(`
@@ -19,7 +42,6 @@ export default async function SubmissionsPage({ searchParams }) {
       is_correct,
       submitted_at,
       user_id,
-      profiles (username, full_name),
       ctf_challenges (title, competition_id, ctf_competitions (title))
     `, { count: 'exact' })
     .order("submitted_at", { ascending: false })
@@ -31,7 +53,25 @@ export default async function SubmissionsPage({ searchParams }) {
     query = query.eq('is_correct', false);
   }
 
-  const { data: submissions, count } = await query;
+  const { data: submissions, count, error } = await query;
+
+  if (error) {
+    console.error('Submissions query error:', error);
+  }
+
+  // Fetch profiles separately and attach to submissions
+  if (submissions?.length) {
+    const userIds = [...new Set(submissions.map(s => s.user_id))];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, username, full_name")
+      .in("id", userIds);
+
+    const profileMap = Object.fromEntries(profiles?.map(p => [p.id, p]) || []);
+    submissions.forEach(sub => {
+      sub.profiles = profileMap[sub.user_id] || null;
+    });
+  }
 
   const totalPages = Math.ceil((count || 0) / limit);
 

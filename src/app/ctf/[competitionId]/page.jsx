@@ -162,7 +162,7 @@ export default async function CompetitionPage({ params }) {
                       [{isActive ? 'ACTIVE' : hasEnded ? 'ENDED' : 'UPCOMING'}]
                     </span>
                   </div>
-                  <h1 className="text-glow-amber text-2xl font-semibold text-white sm:text-3xl">
+                  <h1 className="rgb-hover text-2xl font-semibold text-white sm:text-3xl">
                     {competition.title}
                   </h1>
                   {competition.description && (
@@ -244,7 +244,7 @@ export default async function CompetitionPage({ params }) {
                         <span>{category}</span>
                         <span className="h-px flex-1 bg-purple-900/50" />
                       </h2>
-                      <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="grid gap-4">
                         {categorizedChallenges[category].map((challenge) => (
                           <ChallengeCard
                             key={challenge.id}

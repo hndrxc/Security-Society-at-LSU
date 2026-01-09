@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import LogoBadge from "@/components/LogoBadge";
 import AccountForm from "./account-form";
 import { createClient } from "../../../utils/supabase/server";
@@ -9,6 +10,11 @@ export default async function Account() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Redirect unauthenticated users to login
+  if (!user) {
+    redirect("/login");
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-[#0d0a14] to-black text-slate-100 cyber-grid">

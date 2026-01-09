@@ -1,13 +1,35 @@
 // src/app/admin/ctf/competitions/[id]/challenges/page.jsx
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import ChallengeForm from "@/components/admin/ChallengeForm";
 import DeleteChallengeButton from "@/components/admin/DeleteChallengeButton";
 import { createClient } from "../../../../../../../utils/supabase/server";
 
+// Helper to verify admin authorization
+async function requireAdmin() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile?.is_admin) {
+    redirect("/");
+  }
+
+  return supabase;
+}
+
 export default async function ChallengesPage({ params }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const supabase = await requireAdmin();
 
   // Get competition
   const { data: competition, error: compError } = await supabase

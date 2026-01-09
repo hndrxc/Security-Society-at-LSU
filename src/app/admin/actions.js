@@ -26,7 +26,7 @@ async function requireAdmin() {
   return { supabase, user }
 }
 
-// Helper to verify competition access (owner or collaborator)
+// Helper to verify competition access (owner, collaborator, or admin)
 async function verifyCompetitionAccess(supabase, competitionId, userId, requiredRole = 'editor') {
   // Check if owner
   const { data: competition } = await supabase
@@ -46,12 +46,24 @@ async function verifyCompetitionAccess(supabase, competitionId, userId, required
     .eq('user_id', userId)
     .single()
 
-  if (!collaborator) return { hasAccess: false, isOwner: false }
+  if (collaborator) {
+    const roleHierarchy = { viewer: 1, editor: 2 }
+    const hasAccess = roleHierarchy[collaborator.role] >= roleHierarchy[requiredRole]
+    return { hasAccess, isOwner: false, role: collaborator.role }
+  }
 
-  const roleHierarchy = { viewer: 1, editor: 2 }
-  const hasAccess = roleHierarchy[collaborator.role] >= roleHierarchy[requiredRole]
+  // Fallback: check if user is admin (admins have full access)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', userId)
+    .single()
 
-  return { hasAccess, isOwner: false, role: collaborator.role }
+  if (profile?.is_admin) {
+    return { hasAccess: true, isOwner: false, isAdmin: true }
+  }
+
+  return { hasAccess: false, isOwner: false }
 }
 
 // Competition actions
@@ -85,7 +97,8 @@ export async function createCompetition(prevState, formData) {
       .single()
 
     if (error) {
-      return { success: false, message: 'Failed to create competition' }
+      console.error('Create competition error:', error)
+      return { success: false, message: error.message || 'Failed to create competition' }
     }
 
     revalidatePath('/admin/ctf/competitions')
