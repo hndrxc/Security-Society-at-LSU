@@ -1,15 +1,37 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "../../../utils/supabase/client";
+import { signOut } from "./actions";
+
+// Validation helpers
+const USERNAME_REGEX = /^[a-zA-Z0-9_-]{3,30}$/;
+const URL_REGEX = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+
+function validateUsername(value) {
+  if (!value) return null;
+  if (!USERNAME_REGEX.test(value)) {
+    return "Username must be 3-30 characters, alphanumeric with _ or -";
+  }
+  return null;
+}
+
+function validateWebsite(value) {
+  if (!value) return null;
+  if (!URL_REGEX.test(value)) {
+    return "Please enter a valid URL";
+  }
+  return null;
+}
 
 export default function AccountForm({ user }) {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [loading, setLoading] = useState(true);
   const [fullname, setFullname] = useState("");
   const [username, setUsername] = useState("");
   const [website, setWebsite] = useState("");
   const [status, setStatus] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const inputClasses =
     "w-full rounded-xl border border-purple-900/60 bg-black/40 px-4 py-3 text-slate-100 placeholder-slate-500 shadow-inner shadow-purple-900/20 focus:border-amber-400 focus:outline-none focus:ring focus:ring-amber-300/30";
@@ -58,6 +80,20 @@ export default function AccountForm({ user }) {
   }, [user, getProfile]);
 
   async function updateProfile({ username, website }) {
+    // Validate inputs before submission
+    const usernameError = validateUsername(username);
+    const websiteError = validateWebsite(website);
+
+    if (usernameError || websiteError) {
+      setValidationErrors({
+        username: usernameError,
+        website: websiteError,
+      });
+      return;
+    }
+
+    setValidationErrors({});
+
     try {
       setLoading(true);
       setStatus(null);
@@ -119,9 +155,14 @@ export default function AccountForm({ user }) {
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className={inputClasses}
+          className={`${inputClasses} ${validationErrors.username ? "border-rose-500" : ""}`}
           placeholder="Pick a handle"
+          pattern="[a-zA-Z0-9_-]{3,30}"
+          title="3-30 characters, letters, numbers, underscore, or hyphen"
         />
+        {validationErrors.username && (
+          <p className="text-xs text-rose-400">{validationErrors.username}</p>
+        )}
       </div>
       <div className="grid gap-2">
         <label className={labelClasses} htmlFor="website">
@@ -132,9 +173,12 @@ export default function AccountForm({ user }) {
           type="url"
           value={website}
           onChange={(e) => setWebsite(e.target.value)}
-          className={inputClasses}
+          className={`${inputClasses} ${validationErrors.website ? "border-rose-500" : ""}`}
           placeholder="https://"
         />
+        {validationErrors.website && (
+          <p className="text-xs text-rose-400">{validationErrors.website}</p>
+        )}
       </div>
 
       {status?.message && (
@@ -156,7 +200,7 @@ export default function AccountForm({ user }) {
         >
           {loading ? "Saving..." : "Save changes"}
         </button>
-        <form action="/auth/signout" method="post" className="flex-1">
+        <form action={signOut} className="flex-1">
           <button
             className="inline-flex w-full items-center justify-center rounded-xl border border-purple-500/60 px-4 py-3 text-sm font-semibold text-purple-100 transition-colors hover:border-purple-400 hover:bg-purple-600 hover:text-white"
             type="submit"

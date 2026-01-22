@@ -40,3 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+.sql
+
+/supabase
+
+# Claude Code context
+claude.md
+.claude
+READMEold.md

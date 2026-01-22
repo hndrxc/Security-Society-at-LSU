@@ -1,49 +1,162 @@
-# SSL Project 
+# Security Society at LSU
 
-Quick note: this is a Next.js app hooked up to Supabase and shipped on Vercel. Nothing fancy, but here's what you need so you don't get lost.
+![Next.js](https://img.shields.io/badge/Next.js_16-000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React_19-61DAFB?logo=react&logoColor=black)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_4-06B6D4?logo=tailwindcss&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000?logo=vercel&logoColor=white)
 
-## What's inside
-- Next.js app router with basic pages in `src/app`
-- Supabase database + auth
-- Minimal UI with Tailwind-style utility classes and simple cards/forms
-- Deploy target: Vercel
+A full-stack CTF competition platform and club website for the Security Society at LSU. Features real-time leaderboards, secure flag validation, multi-admin collaboration, and event management.
 
-## Getting started fast
-1) `npm install`
-2) Copy `.env.example` to `.env.local` (make it if it's missing)
-3) Fill these with your Supabase project values:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY` (only if you need server-side bits)
-4) Run `npm run dev` and open http://localhost:3000
+## 🔗 Live Site
 
-## Supabase pieces to know
-- Database: holds the app data; check `utils` or API routes for queries.
-- Auth: using Supabase Auth; make sure the redirect URLs in Supabase match your local and Vercel URLs.
-- Client setup: the Supabase client is pulled in where needed for data fetching and auth checks.
+**[cyberclublsu.com](https://cyberclublsu.com)**
 
-## Design vibe
-- Simple, clean cards and forms; leans on utility classes over custom components.
-- No heavy design system—easy to tweak in `src/app` or shared components.
+---
 
-## Feature checklist (roadmap-ish)
-- Completed
-  - [x] Next.js + Supabase base app
-  - [x] Supabase auth hooked up
-  - [x] Vercel deploy setup
-  - [x] Basic info About Club
-- WIP
-  - [ ] Current event viewer so people can see what's live
-- Future (not built yet, just planned)
-  - [ ] Built-in CTF flag checker to verify submissions in-app
-  - [ ] CTF score leaderboard to show standings
-  - [ ] Admin console for CTF management (events, teams, manual fixes)
+## Features
 
-## Deploying to Vercel
-- Push to the repo; set the same env vars in Vercel's dashboard.
-- Build command: `npm run build`
-- If auth redirects break, update Supabase Auth redirect URLs to include your Vercel domain.
+### CTF Platform
+- **Multi-competition support** with configurable start/end times
+- **8 challenge categories**: web, crypto, forensics, pwn, reversing, misc, osint, steganography
+- **4 difficulty levels**: easy, medium, hard, insane
+- **Secure flag validation** using SHA256 hashing—plaintext flags never stored
+- **Hint system** with configurable point costs and 10% minimum point preservation
+- **Real-time leaderboards** with first blood detection and solve-time tiebreakers
+- **Attempt limiting** and challenge visibility controls
 
-## Random tips
-- If you get auth issues, clear cookies and re-login—Supabase can be picky during local dev.
-- Keep an eye on Supabase row-level security (RLS) if you add new tables.
+### Security
+- Row-Level Security (RLS) policies on all 8 database tables
+- Rate limiting middleware (10 req/min auth, 30 req/min submissions)
+- Content Security Policy headers
+- `SECURITY DEFINER` functions to prevent RLS bypass attacks
+
+### Admin Tools
+- Dashboard with competition and submission statistics
+- CRUD for competitions, challenges, and events
+- Multi-admin collaboration with editor/viewer roles
+- Flag submission review interface
+
+### Club Features
+- Event management with timezone-aware scheduling
+- Officer showcase and club information
+- Discord integration
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 16 (App Router) |
+| Frontend | React 19, TailwindCSS 4 |
+| Backend | Supabase (PostgreSQL, Auth, RLS) |
+| Deployment | Vercel |
+| Auth | Supabase Auth (email/password) |
+
+---
+
+## Architecture
+
+```
+src/
+├── app/                    # 16 routes (App Router)
+│   ├── ctf/               # Competition pages
+│   ├── admin/             # Protected admin routes
+│   ├── events/            # Event listing
+│   └── login/             # Auth flows
+├── components/            # 18 React components
+└── hooks/                 # Custom hooks (auth, storage)
+
+utils/
+├── supabase/              # Client configs (server/client/middleware)
+└── auth/                  # Auth utilities
+
+supabase/
+└── migrations/            # 7 SQL migrations (schema, RLS, functions)
+```
+
+### Database Schema
+
+8 tables with comprehensive RLS policies:
+
+- `profiles` — User metadata and admin flags
+- `ctf_competitions` — Competition configuration
+- `ctf_challenges` — Challenge data with hashed flags
+- `ctf_submissions` — Attempt logging with IP tracking
+- `ctf_solves` — Successful solves with point calculation
+- `ctf_hint_unlocks` — Hint purchase records
+- `ctf_competition_collaborators` — Multi-admin access
+- `events` — Club event scheduling
+
+### Key Database Functions
+
+| Function | Purpose |
+|----------|---------|
+| `verify_ctf_flag()` | Validates submissions, calculates points, detects first blood |
+| `get_competition_leaderboard()` | Ranked query with solve-time tiebreaker |
+| `unlock_hint()` | Hint purchase with point deduction |
+| `hash_ctf_flag()` | SHA256 hashing for flag storage |
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+
+- Supabase project
+
+### Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env.local
+```
+
+Add your Supabase credentials to `.env.local`:
+```
+NEXT_PUBLIC_SUPABASE_URL=your_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+```bash
+# Run development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+---
+
+## Deployment
+
+Deployed via Vercel Git integration. Set environment variables in Vercel dashboard:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_DISCORD_SERVER_ID`
+- `NEXT_PUBLIC_DISCORD_INVITE`
+
+---
+
+## Stats
+
+- **58 source files**
+- **~7,300 lines** of frontend code
+- **~1,200 lines** of SQL migrations
+- **8 database tables** with RLS
+- **6 PL/pgSQL functions**
+
+---
+
+## Author
+
+**Carter Hendricks** — Webmaster, Security Society at LSU
+
+- GitHub: [@hndrxc](https://github.com/hndrxc)
+- LinkedIn: [carter-dell-hendricks](https://linkedin.com/in/carter-dell-hendricks)

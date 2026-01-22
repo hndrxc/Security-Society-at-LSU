@@ -5,8 +5,8 @@ import { redirect } from 'next/navigation'
 
 import { createClient } from '../../../utils/supabase/server'
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const MIN_PASSWORD_LENGTH = 6
+const emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/
+const MIN_PASSWORD_LENGTH = 8
 
 function invalidCredentialsMessage(intent) {
   if (intent === 'signup') {
@@ -36,7 +36,7 @@ export async function authenticate(_prevState, formData) {
   }
 
   if (intent === 'signup' && password.length < MIN_PASSWORD_LENGTH) {
-    return { type: 'error', message: 'Password must be at least 6 characters long.' }
+    return { type: 'error', message: 'Password must be at least 8 characters long.' }
   }
 
   const supabase = await createClient()
@@ -79,7 +79,6 @@ export async function sendReset(prevState, formData) {
     return { type: 'error', message: 'Please enter your email.' }
   }
 
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailPattern.test(email)) {
     return { type: 'error', message: 'Enter a valid email address.' }
   }
