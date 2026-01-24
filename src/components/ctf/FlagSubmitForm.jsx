@@ -19,7 +19,7 @@ export default function FlagSubmitForm({ challengeId, disabled, onSuccess }) {
         <input
           name="flag"
           type="text"
-          placeholder="SSL{...}"
+          placeholder="flag{...}"
           disabled={disabled || pending}
           autoComplete="off"
           className="flex-1 rounded-lg border border-purple-900/60 bg-black/60 px-4 py-3 font-mono text-sm text-slate-100 placeholder-slate-500 focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 disabled:opacity-50"
