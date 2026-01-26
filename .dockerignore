@@ -1,0 +1,3 @@
+# Don't copy these junk files
+node_modules
+.git

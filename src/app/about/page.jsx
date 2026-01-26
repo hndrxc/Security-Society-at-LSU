@@ -48,7 +48,7 @@ const officers = [
       "Responsible for communication between LSU, board, and members. This includes maintenance of newsletter and calendar.",
   },
   {
-    name: "Ronald Gibson",
+    name: "Ronald Gibson, III",
     role: "Outreach Chair",
     team: "just a guy",
     photoPath: "ronald.png",
@@ -221,7 +221,7 @@ export default function AboutPage() {
             </div>
             <div className="hover-sweep clip-cyber border border-purple-900/50 bg-gradient-to-br from-[#181124] via-[#0f0b16] to-black px-5 py-4 shadow-lg shadow-purple-900/30">
               <p className="font-terminal text-sm font-semibold uppercase tracking-wide text-amber-300/90">MEETINGS:</p>
-              <p className="text-glow-amber mt-2 text-3xl font-semibold text-white">Tue & Fri</p>
+              <p className="text-glow-amber mt-2 text-3xl font-semibold text-white">Mon & Fri</p>
             </div>
           </div>
         </section>

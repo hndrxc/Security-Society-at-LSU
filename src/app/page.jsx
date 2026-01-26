@@ -4,20 +4,20 @@ import { createClient } from "../../utils/supabase/server";
 import SnowfallEffect from "@/components/SnowfallEffect";
 const highlights = [
   {
-    title: "Community-first programs",
+    title: "Community-first Programs",
     detail: "Workshops, mentorship, and resources shaped with our partners and neighbors.",
   },
   {
-    title: "Capture The Flag Team",
-    detail: "We Organize CTF events and Challenges for our members",
+    title: "Capture the Flag Team",
+    detail: "We organize CTF events and challenges for our members.",
   },
   {
-    title: "Trusted network",
-    detail: "Local leaders, educators, and peers sharing their Cybersecurity Knowledge",
+    title: "Trusted Network",
+    detail: "Local leaders, educators, and peers sharing their cybersecurity knowledge.",
   },
   {
     title: "Weekly Meetings",
-    detail: "We host Multiple levels of meeting throughout the week allowing members of all skill levels to learn",
+    detail: "We host Multiple levels of meeting throughout the week allowing members of all skill levels to learn.",
   },
 ];
 
@@ -89,7 +89,7 @@ export default async function Home() {
               Welcome to the Security Society at LSU. We are a Cybersecurity club that aims to equip students with the technical skills needed in today&apos;s cybersecurity landscape, and provide job opportunities by connecting them with industry professionals.
             </p>
             <p className="text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-              <span className="font-terminal text-amber-200">[LOCATION]</span> PFT 1240 on Tuesdays, PFT 1212 on Fridays @ 6:00-7:30
+              <span className="font-terminal text-amber-200">[LOCATION]</span> PFT 1240 on Mondays & Fridays @ 6:00-7:30
               <br />
               <span className="font-terminal text-amber-200">[CONTACT]</span> securitysocietylsu@protonmail.com
             </p>
