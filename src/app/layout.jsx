@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Security Society at LSU",
   description: "SSL is the best club",
+  themeColor: "#050308",
 };
 
 export default function RootLayout({ children }) {

@@ -65,6 +65,14 @@ const officers = [
       "Responsible for SSL funds and fundraising",
   },
   {
+    name: "Chloe Phan",
+    role: "Graphics Designer/Social Media Lead",
+    team: "Officer",
+    photoPath: "chloe.jpg",
+    description:
+      "make graphic designs, manage socials",
+  },
+  {
     name: "Jennifer Saldana",
     role: "CTF Lead",
     team: "CTF",
@@ -88,14 +96,7 @@ const officers = [
     description:
       "Responsible for organizing Hello, Hacker! and helping to organize CTF meetings, future hackathons, and train for future CTF competitions",
   },
-  {
-    name: "Chloe Phan",
-    role: "Graphics Designer/Social Media Lead",
-    team: "Officer",
-    photoPath: "chloe.jpg",
-    description:
-      "make graphic designs, manage socials",
-  },
+  
 ];
 
 function OfficerCard({ officer, index = 0 }) {

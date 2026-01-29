@@ -29,6 +29,10 @@
   box-sizing: border-box;
 }
 
+html {
+  background-color: var(--background);
+}
+
 body {
   min-height: 100vh;
   background: radial-gradient(100% 120% at 20% 10%, rgba(124, 58, 237, 0.25), transparent),
