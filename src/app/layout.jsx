@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Security Society at LSU",
   description: "SSL is the best club",
+};
+
+export const viewport = {
   themeColor: "#050308",
 };
 

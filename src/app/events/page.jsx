@@ -91,7 +91,7 @@ export default async function EventsPage() {
                   }
 
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 sm:max-w-xl">
                       <h2 className="rgb-hover text-xl font-semibold text-white">
                         <span className="font-terminal mr-2 text-sm text-purple-400">[MISSION]</span>
                         {event.title}
@@ -105,7 +105,7 @@ export default async function EventsPage() {
                         <p className="text-sm leading-6 text-slate-300">{event.description}</p>
                       )}
                     </div>
-                    <div className="flex flex-col items-start gap-1 font-semibold text-slate-200 sm:items-end">
+                    <div className="flex flex-col items-start gap-1 font-semibold text-slate-200 sm:items-end shrink-0 whitespace-nowrap">
                       <div className="font-terminal text-xs">
                         <span className="text-[#39ff14]">START:</span>
                         <span className="ml-2 text-slate-300">{new Date(event.starts_at).toLocaleString("en-US", { timeZone: event.timezone || "America/Chicago" })}</span>
