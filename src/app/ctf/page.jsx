@@ -88,7 +88,7 @@ export default async function CTFPage() {
                 <span className="ml-2 text-slate-400">LOADING CTF OPERATIONS...</span>
               </div>
               <p className="font-terminal text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">[CTF] Capture The Flag</p>
-              <h1 className="text-glow-amber text-3xl font-semibold text-white sm:text-4xl">Active Competitions</h1>
+              <h1 className="text-3xl font-semibold text-white sm:text-4xl">Active Competitions</h1>
               <p className="text-sm text-slate-300">
                 Test your skills. Capture flags. Climb the leaderboard.
               </p>
