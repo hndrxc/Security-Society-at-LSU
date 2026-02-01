@@ -131,20 +131,24 @@ function ResetPasswordContent() {
     setLoading(true);
     setStatus(null);
 
-    const { error } = await supabase.auth.updateUser({ password });
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
 
-    if (error) {
-      setStatus({ type: "error", message: "Could not update password. Please try again." });
-    } else {
-      setStatus({
-        type: "success",
-        message: "Password updated. You can log in with your new password now.",
-      });
-      setPassword("");
-      setConfirmPassword("");
+      if (error) {
+        setStatus({ type: "error", message: "Could not update password. Please try again." });
+      } else {
+        setStatus({
+          type: "success",
+          message: "Password updated. You can log in with your new password now.",
+        });
+        setPassword("");
+        setConfirmPassword("");
+      }
+    } catch {
+      setStatus({ type: "error", message: "Something went wrong. Please try again." });
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const inputClasses =
