@@ -217,7 +217,7 @@ function ResetPasswordContent() {
               <button
                 type="submit"
                 className="inline-flex w-full items-center justify-center rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-black shadow-lg shadow-amber-500/30 transition-transform hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
-                disabled={loading || checking}
+                disabled={loading}
               >
                 {loading ? "Updating..." : "Update password"}
               </button>
