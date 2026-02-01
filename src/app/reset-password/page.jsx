@@ -178,7 +178,7 @@ function ResetPasswordContent() {
                 onChange={(event) => setPassword(event.target.value)}
                 className={inputClasses}
                 placeholder="Choose something strong"
-                disabled={loading || checking}
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -194,7 +194,7 @@ function ResetPasswordContent() {
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 className={inputClasses}
                 placeholder="Re-enter your password"
-                disabled={loading || checking}
+                disabled={loading}
               />
             </div>
 
