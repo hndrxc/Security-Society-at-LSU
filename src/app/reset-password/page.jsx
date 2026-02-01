@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import LogoBadge from "@/components/LogoBadge";
 import { createClient } from "../../../utils/supabase/client";
 
@@ -35,8 +34,6 @@ function ResetPasswordFallback() {
 
 function ResetPasswordContent() {
   const supabase = useMemo(() => createClient(), []);
-  const searchParams = useSearchParams();
-  const searchParamsString = useMemo(() => searchParams?.toString() ?? "", [searchParams]);
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -48,64 +45,42 @@ function ResetPasswordContent() {
   useEffect(() => {
     let ignore = false;
 
-    const establishSessionFromUrl = async () => {
-      setChecking(true);
-      setStatus(null);
+    // Listen for auth state changes (PASSWORD_RECOVERY event fires when user clicks reset link)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (ignore) return;
 
-      const hashString =
-        typeof window !== "undefined" && window.location.hash ? window.location.hash.substring(1) : "";
-      const hashParams = new URLSearchParams(hashString);
-      const queryParams = new URLSearchParams(searchParamsString);
-
-      const accessToken = hashParams.get("access_token") || queryParams.get("access_token");
-      const refreshToken = hashParams.get("refresh_token") || queryParams.get("refresh_token");
-      const code = queryParams.get("code");
-
-      try {
-        // Supabase can return tokens in the URL hash (most recovery emails) or a PKCE code query param.
-        if (accessToken && refreshToken) {
-          await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-        } else if (code) {
-          await supabase.auth.exchangeCodeForSession(code);
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+        if (session) {
+          setSessionReady(true);
+          setChecking(false);
         }
+      }
+    });
 
-        const { data, error } = await supabase.auth.getUser();
-
+    // Also check if there's already a valid session (handles page refresh)
+    const checkExistingSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
         if (!ignore) {
-          if (error || !data?.user) {
-            setStatus({
-              type: "error",
-              message: "We could not validate this reset link. Request a fresh email and try again.",
-            });
-            setSessionReady(false);
-          } else {
+          if (session) {
             setSessionReady(true);
           }
+          setChecking(false);
         }
-      } catch (error) {
-        if (!ignore) {
-          setStatus({
-            type: "error",
-            message: "We could not validate this reset link. Request a fresh email and try again.",
-          });
-          setSessionReady(false);
-        }
-      } finally {
+      } catch {
         if (!ignore) {
           setChecking(false);
         }
       }
     };
 
-    establishSessionFromUrl();
+    checkExistingSession();
 
     return () => {
       ignore = true;
+      subscription.unsubscribe();
     };
-  }, [supabase, searchParamsString]);
+  }, [supabase]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
