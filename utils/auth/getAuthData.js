@@ -1,10 +1,11 @@
 import { createClient } from "../supabase/server";
+import { isProfileComplete } from "./requireCompleteProfile";
 
 /**
  * Get authenticated user and their profile data.
  * For use in server components.
  *
- * @returns {Promise<{user: object|null, profile: object|null}>}
+ * @returns {Promise<{user: object|null, profile: object|null, isProfileComplete: boolean}>}
  */
 export async function getAuthData() {
   const supabase = await createClient();
@@ -14,7 +15,7 @@ export async function getAuthData() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { user: null, profile: null };
+    return { user: null, profile: null, isProfileComplete: false };
   }
 
   const { data: profile } = await supabase
@@ -23,5 +24,5 @@ export async function getAuthData() {
     .eq("id", user.id)
     .single();
 
-  return { user, profile };
+  return { user, profile, isProfileComplete: isProfileComplete(profile) };
 }

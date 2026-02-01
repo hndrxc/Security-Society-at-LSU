@@ -6,30 +6,26 @@ import { signOut } from "./actions";
 
 // Validation helpers
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]{3,30}$/;
-const URL_REGEX = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
 function validateUsername(value) {
-  if (!value) return null;
+  if (!value?.trim()) return "Username is required";
   if (!USERNAME_REGEX.test(value)) {
     return "Username must be 3-30 characters, alphanumeric with _ or -";
   }
   return null;
 }
 
-function validateWebsite(value) {
-  if (!value) return null;
-  if (!URL_REGEX.test(value)) {
-    return "Please enter a valid URL";
-  }
+function validateFullname(value) {
+  if (!value?.trim()) return "Full name is required";
+  if (value.trim().length < 2) return "Full name must be at least 2 characters";
   return null;
 }
 
-export default function AccountForm({ user }) {
+export default function AccountForm({ user, isProfileIncomplete = false }) {
   const supabase = useMemo(() => createClient(), []);
   const [loading, setLoading] = useState(true);
   const [fullname, setFullname] = useState("");
   const [username, setUsername] = useState("");
-  const [website, setWebsite] = useState("");
   const [status, setStatus] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -45,7 +41,6 @@ export default function AccountForm({ user }) {
       if (!user) {
         setFullname("");
         setUsername("");
-        setWebsite("");
         setStatus({
           type: "error",
           message: "You need to be signed in to manage your account.",
@@ -55,7 +50,7 @@ export default function AccountForm({ user }) {
 
       const { data, error, status: statusCode } = await supabase
         .from("profiles")
-        .select("full_name, username, website, avatar_url")
+        .select("full_name, username, avatar_url")
         .eq("id", user.id)
         .single();
 
@@ -66,7 +61,6 @@ export default function AccountForm({ user }) {
       if (data) {
         setFullname(data.full_name || "");
         setUsername(data.username || "");
-        setWebsite(data.website || "");
       }
     } catch (error) {
       setStatus({ type: "error", message: "Error loading user data." });
@@ -79,15 +73,15 @@ export default function AccountForm({ user }) {
     getProfile();
   }, [user, getProfile]);
 
-  async function updateProfile({ username, website }) {
+  async function updateProfile({ fullname, username }) {
     // Validate inputs before submission
+    const fullnameError = validateFullname(fullname);
     const usernameError = validateUsername(username);
-    const websiteError = validateWebsite(website);
 
-    if (usernameError || websiteError) {
+    if (fullnameError || usernameError) {
       setValidationErrors({
+        fullname: fullnameError,
         username: usernameError,
-        website: websiteError,
       });
       return;
     }
@@ -107,7 +101,6 @@ export default function AccountForm({ user }) {
         id: user.id,
         full_name: fullname,
         username,
-        website,
         updated_at: new Date().toISOString(),
       });
       if (error) throw error;
@@ -121,6 +114,14 @@ export default function AccountForm({ user }) {
 
   return (
     <div className="space-y-6">
+      {isProfileIncomplete && (
+        <div className="border border-amber-400/50 bg-amber-500/10 p-4 rounded-lg">
+          <p className="font-terminal text-sm text-amber-200">
+            <span className="text-amber-400">[REQUIRED]</span>
+            <span className="ml-2">Complete your profile to access all features.</span>
+          </p>
+        </div>
+      )}
       <div className="grid gap-2">
         <label className={labelClasses} htmlFor="email">
           Email
@@ -135,20 +136,23 @@ export default function AccountForm({ user }) {
       </div>
       <div className="grid gap-2">
         <label className={labelClasses} htmlFor="fullName">
-          Full Name
+          Full Name <span className="text-rose-400">*</span>
         </label>
         <input
           id="fullName"
           type="text"
           value={fullname}
           onChange={(e) => setFullname(e.target.value)}
-          className={inputClasses}
+          className={`${inputClasses} ${validationErrors.fullname ? "border-rose-500" : ""}`}
           placeholder="Add your name"
         />
+        {validationErrors.fullname && (
+          <p className="text-xs text-rose-400">{validationErrors.fullname}</p>
+        )}
       </div>
       <div className="grid gap-2">
         <label className={labelClasses} htmlFor="username">
-          Username
+          Username <span className="text-rose-400">*</span>
         </label>
         <input
           id="username"
@@ -162,22 +166,6 @@ export default function AccountForm({ user }) {
         />
         {validationErrors.username && (
           <p className="text-xs text-rose-400">{validationErrors.username}</p>
-        )}
-      </div>
-      <div className="grid gap-2">
-        <label className={labelClasses} htmlFor="website">
-          Website
-        </label>
-        <input
-          id="website"
-          type="url"
-          value={website}
-          onChange={(e) => setWebsite(e.target.value)}
-          className={`${inputClasses} ${validationErrors.website ? "border-rose-500" : ""}`}
-          placeholder="https://"
-        />
-        {validationErrors.website && (
-          <p className="text-xs text-rose-400">{validationErrors.website}</p>
         )}
       </div>
 
@@ -195,7 +183,7 @@ export default function AccountForm({ user }) {
         <button
           type="button"
           className="inline-flex flex-1 items-center justify-center rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-black shadow-lg shadow-amber-500/30 transition-transform hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
-          onClick={() => updateProfile({ username, website })}
+          onClick={() => updateProfile({ fullname, username })}
           disabled={loading}
         >
           {loading ? "Saving..." : "Save changes"}

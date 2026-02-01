@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "../../../utils/supabase/server";
+import { isProfileComplete } from "../../../utils/auth/requireCompleteProfile";
 
 export default async function AdminLayout({ children }) {
   const supabase = await createClient();
@@ -23,6 +24,11 @@ export default async function AdminLayout({ children }) {
 
   if (!profile?.is_admin) {
     redirect("/");
+  }
+
+  // Require complete profile for admin access
+  if (!isProfileComplete(profile)) {
+    redirect("/account?complete=required");
   }
 
   return (
