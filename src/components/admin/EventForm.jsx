@@ -1,8 +1,11 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createEvent, updateEvent } from '@/app/admin/events/actions'
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 // Common US timezones
 const TIMEZONES = [
@@ -48,6 +51,55 @@ export default function EventForm({ event }) {
   const router = useRouter()
   const isEditing = !!event
   const defaultTz = getDefaultTimezone(event?.timezone)
+  const fileInputRef = useRef(null)
+
+  // Image state
+  const [imagePreview, setImagePreview] = useState(null)
+  const [imageError, setImageError] = useState(null)
+  const [removeImage, setRemoveImage] = useState(false)
+
+  // Build existing image URL if event has one
+  const existingImageUrl = event?.image_path
+    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-media/${event.image_path}`
+    : null
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    setImageError(null)
+    setRemoveImage(false)
+
+    if (!file) {
+      setImagePreview(null)
+      return
+    }
+
+    // Validate file type
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setImageError('Please select a valid image (JPEG, PNG, WebP, or GIF)')
+      e.target.value = ''
+      return
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      setImageError('Image must be less than 5MB')
+      e.target.value = ''
+      return
+    }
+
+    // Create preview
+    const reader = new FileReader()
+    reader.onloadend = () => setImagePreview(reader.result)
+    reader.readAsDataURL(file)
+  }
+
+  const handleRemoveImage = () => {
+    setImagePreview(null)
+    setRemoveImage(true)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   const [state, formAction, pending] = useActionState(async (prevState, formData) => {
     const action = isEditing ? updateEvent : createEvent
@@ -92,6 +144,51 @@ export default function EventForm({ event }) {
           placeholder="Event details and what to expect..."
           className="w-full rounded-lg border border-purple-900/60 bg-black/60 px-4 py-3 text-white placeholder-slate-500 focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
         />
+      </div>
+
+      {/* Event Image */}
+      <div>
+        <label className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+          Event Image
+        </label>
+
+        {/* Image Preview */}
+        {(imagePreview || (existingImageUrl && !removeImage)) && (
+          <div className="relative mb-3 overflow-hidden rounded-lg border border-purple-900/60">
+            <img
+              src={imagePreview || existingImageUrl}
+              alt="Event preview"
+              className="h-48 w-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={handleRemoveImage}
+              className="absolute right-2 top-2 rounded bg-black/70 px-2 py-1 font-terminal text-xs text-rose-400 transition-colors hover:bg-black/90"
+            >
+              Remove
+            </button>
+          </div>
+        )}
+
+        {/* File Input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          name="image"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          onChange={handleFileChange}
+          className="w-full rounded-lg border border-purple-900/60 bg-black/60 px-4 py-3 text-white file:mr-4 file:rounded file:border-0 file:bg-purple-900/50 file:px-4 file:py-2 file:font-terminal file:text-xs file:text-amber-300 file:transition-colors hover:file:bg-purple-900/70 focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
+        />
+
+        {/* Hidden field to signal image removal */}
+        {removeImage && <input type="hidden" name="remove_image" value="true" />}
+
+        {imageError && (
+          <p className="mt-2 font-terminal text-xs text-rose-400">{imageError}</p>
+        )}
+        <p className="mt-2 font-terminal text-xs text-slate-500">
+          JPEG, PNG, WebP, or GIF. Max 5MB. Displays as banner on event page.
+        </p>
       </div>
 
       {/* Location */}

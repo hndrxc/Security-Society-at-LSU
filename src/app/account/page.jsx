@@ -16,6 +16,15 @@ export default async function Account() {
     redirect("/login");
   }
 
+  // Check if profile is incomplete
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username, full_name")
+    .eq("id", user.id)
+    .single();
+
+  const isProfileIncomplete = !profile?.username?.trim() || !profile?.full_name?.trim();
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-[#0d0a14] to-black text-slate-100 cyber-grid">
       {/* Animated blur orbs */}
@@ -59,7 +68,7 @@ export default async function Account() {
             <p className="rgb-hover text-lg font-semibold text-white">Manage your account details</p>
             <p className="text-sm text-slate-300">Update your info and sign out securely.</p>
           </div>
-          <AccountForm user={user} />
+          <AccountForm user={user} isProfileIncomplete={isProfileIncomplete} />
         </div>
       </div>
     </div>

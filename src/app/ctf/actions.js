@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '../../../utils/supabase/server'
+import { isProfileComplete } from '../../../utils/auth/requireCompleteProfile'
 
 export async function submitFlag(prevState, formData) {
   const supabase = await createClient()
@@ -10,6 +11,17 @@ export async function submitFlag(prevState, formData) {
 
   if (!user) {
     return { success: false, message: 'You must be logged in to submit flags' }
+  }
+
+  // Check if profile is complete
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('username, full_name')
+    .eq('id', user.id)
+    .single()
+
+  if (!isProfileComplete(profile)) {
+    return { success: false, message: 'Please complete your profile before submitting flags' }
   }
 
   const challengeId = formData.get('challengeId')
@@ -59,6 +71,17 @@ export async function unlockHint(prevState, formData) {
 
   if (!user) {
     return { success: false, message: 'You must be logged in to unlock hints' }
+  }
+
+  // Check if profile is complete
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('username, full_name')
+    .eq('id', user.id)
+    .single()
+
+  if (!isProfileComplete(profile)) {
+    return { success: false, message: 'Please complete your profile before unlocking hints' }
   }
 
   const challengeId = formData.get('challengeId')

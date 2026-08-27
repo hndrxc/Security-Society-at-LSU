@@ -1,0 +1,800 @@
+.page {
+  --ink: #100b1c;
+  --paper: #f4f0e5;
+  --acid: #f4bd39;
+  --muted: #9aa59e;
+  --line: rgba(220, 229, 216, 0.18);
+  --danger: #ff604f;
+  --font-phish-sans: var(--font-geist-sans);
+  --font-phish-mono: var(--font-geist-mono);
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: clip;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-phish-sans), sans-serif;
+}
+
+.page::before {
+  position: fixed;
+  z-index: -2;
+  inset: 0;
+  content: "";
+  opacity: 0.16;
+  background-image:
+    linear-gradient(rgba(244, 189, 57, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 189, 57, 0.22) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+.page :is(button, input, a):focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: 4px;
+}
+
+.scanlines {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, #fff 4px);
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(290px, 0.8fr);
+  align-items: center;
+  gap: 8vw;
+  width: min(100%, 1240px);
+  min-height: 650px;
+  margin: 0 auto;
+  padding: 90px 5vw 80px;
+}
+
+.eyebrow,
+.sectionLabel,
+.heroIndex,
+.terminalBar,
+.terminalNote {
+  font-family: var(--font-phish-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--acid);
+  box-shadow: 0 0 14px var(--acid);
+}
+
+.heroTitle {
+  max-width: 760px;
+  margin: 30px 0;
+  color: var(--paper);
+  font-size: clamp(3.4rem, 7vw, 7rem);
+  font-weight: 600;
+  line-height: 0.88;
+  letter-spacing: -0.07em;
+}
+
+.heroTitle em,
+.gameHeading em {
+  color: var(--acid);
+  font-style: normal;
+}
+
+.heroDescription {
+  max-width: 390px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.terminalWrap {
+  width: 100%;
+  max-width: 390px;
+  border: 1px solid var(--line);
+  background: rgba(16, 11, 28, 0.82);
+  box-shadow: 18px 18px 0 rgba(244, 189, 57, 0.1);
+  transform: rotate(2deg);
+}
+
+.terminalBar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 39px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.terminalDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.red {
+  background: var(--danger);
+}
+
+.yellow {
+  background: #f1cc67;
+}
+
+.green {
+  background: var(--acid);
+}
+
+.terminalLabel {
+  margin-left: 8px;
+  font-size: 9px;
+}
+
+.terminalBody {
+  padding: 28px;
+  color: var(--muted);
+  font: 12px/1.8 var(--font-phish-mono), monospace;
+}
+
+.terminalBody p {
+  margin: 0 0 7px;
+}
+
+.prompt,
+.accent {
+  color: var(--acid);
+}
+
+.prompt {
+  margin-right: 6px;
+}
+
+.terminalOutput {
+  padding-left: 17px;
+  color: var(--paper);
+}
+
+.cursor {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  vertical-align: middle;
+  background: var(--acid);
+  animation: blink 1s steps(2) infinite;
+}
+
+.terminalNote {
+  padding: 0 28px 22px;
+  color: #738078;
+  font-size: 9px;
+}
+
+.heroIndex {
+  position: absolute;
+  right: 5vw;
+  bottom: 32px;
+  color: var(--muted);
+}
+
+.heroIndex span {
+  margin: 0 5px;
+  color: var(--acid);
+}
+
+.phishGame {
+  width: min(100%, 1240px);
+  margin: 0 auto;
+  padding: 74px 5vw 88px;
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 24px;
+}
+
+.gameHeading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 38px;
+}
+
+.gameHeading h2 {
+  margin: 10px 0 0;
+  color: var(--paper);
+  font-size: clamp(2.4rem, 5vw, 5rem);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.07em;
+}
+
+.gameHeading > p {
+  max-width: 310px;
+  margin: 0 0 3px;
+  color: var(--muted);
+  font: 11px/1.6 var(--font-phish-mono), monospace;
+}
+
+.sectionLabel {
+  margin: 0;
+  color: var(--acid);
+}
+
+.gameStage {
+  min-height: 475px;
+  border: 1px solid var(--line);
+  background: rgba(16, 11, 28, 0.72);
+}
+
+.gameStatus,
+.challengeMeta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--acid);
+  font-family: var(--font-phish-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.gameStatus {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.nameGate,
+.challenge,
+.gameComplete {
+  padding: 45px 5vw;
+}
+
+.nameGate label {
+  display: block;
+  margin-bottom: 16px;
+  color: var(--paper);
+  font-size: 21px;
+}
+
+.nameRow {
+  display: flex;
+  gap: 10px;
+}
+
+.nameRow input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  padding: 15px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--paper);
+  font: 12px var(--font-phish-mono), monospace;
+}
+
+.nameRow input:focus {
+  border-color: var(--acid);
+}
+
+.nameRow input::placeholder {
+  color: #78837c;
+}
+
+.gameButton,
+.primaryButton,
+.discordLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: var(--acid);
+  color: var(--ink);
+  font-family: var(--font-phish-mono), monospace;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.gameButton {
+  min-height: 48px;
+  padding: 0 17px;
+  cursor: pointer;
+}
+
+.gameButton:hover,
+.primaryButton:hover,
+.discordLink:hover {
+  background: #ffe29a;
+  color: var(--ink);
+}
+
+.gameButton span,
+.primaryButton span,
+.discordLink span {
+  margin-left: 8px;
+  font-size: 16px;
+}
+
+.formNote {
+  min-height: 18px;
+  margin: 10px 0 0;
+  color: var(--danger);
+  font: 10px var(--font-phish-mono), monospace;
+}
+
+.messageCard {
+  margin: 23px 0 24px;
+  border: 1px solid rgba(244, 189, 57, 0.35);
+  padding: 21px;
+  background: rgba(244, 189, 57, 0.04);
+}
+
+.messageHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  overflow-wrap: anywhere;
+  color: var(--acid);
+  font: 10px var(--font-phish-mono), monospace;
+}
+
+.messageHeader span:last-child {
+  color: var(--muted);
+}
+
+.messageCard h3 {
+  margin: 21px 0 10px;
+  color: var(--paper);
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.messageCard p {
+  max-width: 600px;
+  margin: 0 0 18px;
+  color: var(--muted);
+  font: 12px/1.6 var(--font-phish-mono), monospace;
+}
+
+.messageLink {
+  display: inline-block;
+  overflow-wrap: anywhere;
+  color: #d4a9fa;
+  font: 11px var(--font-phish-mono), monospace;
+}
+
+.challengePrompt {
+  margin: 0 0 12px;
+  color: var(--paper);
+  font: 11px var(--font-phish-mono), monospace;
+  text-transform: uppercase;
+}
+
+.classificationList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(110px, 170px));
+  gap: 9px;
+}
+
+.classificationButton,
+.clueButton {
+  border: 1px solid var(--line);
+  border-radius: 0;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--paper);
+  font-family: var(--font-phish-mono), monospace;
+  font-size: 11px;
+}
+
+.classificationButton {
+  min-height: 52px;
+  letter-spacing: 0.08em;
+}
+
+.classificationButton:hover:not(:disabled),
+.clueButton:hover:not(:disabled) {
+  border-color: var(--acid);
+  background: rgba(244, 189, 57, 0.08);
+}
+
+.wrong {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.clueStep {
+  margin-top: 27px;
+  border-top: 1px solid var(--line);
+  padding-top: 23px;
+}
+
+.clueList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+
+.clueButton {
+  min-height: 68px;
+  padding: 12px;
+  text-align: left;
+  line-height: 1.45;
+}
+
+.clueButton span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--acid);
+  font-size: 10px;
+}
+
+.clueButton:disabled {
+  cursor: default;
+}
+
+.clueButton.correct {
+  border-color: var(--acid);
+  background: rgba(244, 189, 57, 0.15);
+  color: var(--paper);
+}
+
+.clueButton.wrong {
+  opacity: 0.65;
+}
+
+.feedback {
+  min-height: 20px;
+  margin: 15px 0 0;
+  color: var(--acid);
+  font: 10px var(--font-phish-mono), monospace;
+}
+
+.nextQuestion {
+  margin-top: 10px;
+}
+
+.gameComplete {
+  text-align: center;
+}
+
+.completeKicker {
+  margin: 0;
+  color: var(--acid);
+  font: 10px var(--font-phish-mono), monospace;
+  letter-spacing: 0.08em;
+}
+
+.gameComplete h3 {
+  margin: 20px 0 10px;
+  color: var(--paper);
+  font-size: clamp(3.5rem, 9vw, 7rem);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+}
+
+.gameComplete > p:not(.completeKicker) {
+  margin: 0 auto 26px;
+  color: var(--muted);
+  font: 12px/1.6 var(--font-phish-mono), monospace;
+}
+
+.bottomJoin {
+  display: flex;
+  justify-content: center;
+  padding: 0 5vw 70px;
+  animation: revealJoin 0.45s ease both;
+}
+
+.primaryButton,
+.discordLink {
+  padding: 14px 16px;
+}
+
+.modalBackdrop {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(8, 10, 9, 0.82);
+  backdrop-filter: blur(7px);
+  animation: fadeIn 0.35s ease;
+}
+
+.hackModal {
+  width: min(100%, 590px);
+  border: 1px solid var(--acid);
+  background: #171025;
+  box-shadow:
+    0 0 0 1px rgba(244, 189, 57, 0.2),
+    0 0 55px rgba(111, 63, 160, 0.28);
+  animation: modalIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.modalTopline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(244, 189, 57, 0.35);
+  color: var(--acid);
+  font: 10px var(--font-phish-mono), monospace;
+  letter-spacing: 0.06em;
+}
+
+.warningIcon {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--acid);
+  font-weight: 500;
+}
+
+.modalCode {
+  margin-left: auto;
+  opacity: 0.65;
+}
+
+.modalContent {
+  padding: 37px 38px 34px;
+}
+
+.glitchTitle {
+  position: relative;
+  margin: 0;
+  color: var(--paper);
+  font: 600 clamp(2.3rem, 7vw, 4.6rem) / 0.95 var(--font-phish-sans), sans-serif;
+  letter-spacing: -0.07em;
+}
+
+.glitchTitle::before,
+.glitchTitle::after {
+  position: absolute;
+  inset: 0;
+  content: attr(data-text);
+  pointer-events: none;
+}
+
+.glitchTitle::before {
+  clip-path: inset(0 0 55% 0);
+  color: var(--acid);
+  opacity: 0.65;
+  transform: translate(2px, -1px);
+}
+
+.glitchTitle::after {
+  clip-path: inset(55% 0 0 0);
+  color: #a56bdb;
+  opacity: 0.7;
+  transform: translate(-2px, 1px);
+}
+
+.modalCopy {
+  max-width: 450px;
+  margin: 24px 0 25px;
+  color: var(--muted);
+  font: 13px/1.65 var(--font-phish-mono), monospace;
+}
+
+.dismissButton {
+  display: block;
+  margin-top: 25px;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  color: var(--muted);
+  font: 10px var(--font-phish-mono), monospace;
+  text-transform: uppercase;
+}
+
+.dismissButton:hover {
+  color: var(--paper);
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  padding: 11px 16px;
+  color: #a293ad;
+  font: 9px var(--font-phish-mono), monospace;
+  text-transform: uppercase;
+}
+
+.loading {
+  display: flex;
+  gap: 3px;
+}
+
+.loading i {
+  display: block;
+  width: 4px;
+  height: 4px;
+  background: var(--acid);
+  animation: pulse 1s infinite;
+}
+
+.loading i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.loading i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+@keyframes revealJoin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 700px) {
+  .hero {
+    display: block;
+    min-height: calc(100svh + 180px);
+    padding-top: 70px;
+  }
+
+  .heroTitle {
+    font-size: clamp(3rem, 15vw, 5rem);
+  }
+
+  .heroDescription {
+    font-size: 14px;
+  }
+
+  .terminalWrap {
+    width: 88%;
+    margin: 65px 0 0 auto;
+  }
+
+  .heroIndex {
+    bottom: 28px;
+  }
+
+  .phishGame {
+    padding-top: 55px;
+  }
+
+  .gameHeading {
+    display: block;
+  }
+
+  .gameHeading h2 {
+    margin: 24px 0 15px;
+  }
+
+  .gameHeading > p {
+    max-width: 320px;
+  }
+
+  .gameStage {
+    min-height: 0;
+  }
+
+  .nameGate,
+  .challenge,
+  .gameComplete {
+    padding: 34px 22px;
+  }
+
+  .nameGate label {
+    font-size: 18px;
+  }
+
+  .nameRow {
+    display: block;
+  }
+
+  .nameRow input,
+  .nameRow .gameButton {
+    width: 100%;
+    height: 48px;
+  }
+
+  .nameRow .gameButton {
+    margin-top: 9px;
+  }
+
+  .clueList {
+    grid-template-columns: 1fr;
+  }
+
+  .clueButton {
+    min-height: 54px;
+  }
+
+  .messageCard {
+    padding: 16px;
+  }
+
+  .messageCard h3 {
+    font-size: 18px;
+  }
+
+  .messageHeader {
+    display: block;
+  }
+
+  .messageHeader span:last-child {
+    display: block;
+    margin-top: 6px;
+  }
+
+  .modalContent {
+    padding: 30px 24px 28px;
+  }
+
+  .modalTopline {
+    font-size: 8px;
+  }
+
+  .modalCode {
+    display: none;
+  }
+
+  .modalCopy {
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page *,
+  .page *::before,
+  .page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

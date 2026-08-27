@@ -45,6 +45,6 @@ next-env.d.ts
 /supabase
 
 # Claude Code context
-claude.md
+CLAUDE.md
 .claude
 READMEold.md

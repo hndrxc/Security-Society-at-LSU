@@ -11,10 +11,12 @@ export default async function EventsPage() {
 
   const { data: events, error } = await supabase
     .from("events")
-    .select("id,title,description,starts_at,ends_at,location,timezone")
+    .select("id,title,description,starts_at,ends_at,location,timezone,image_path")
     .eq("is_visible", true)
     .gte("ends_at", new Date().toISOString())
     .order("starts_at", { ascending: true });
+
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-[#0d0a14] to-black text-slate-100 cyber-grid">
@@ -78,19 +80,31 @@ export default async function EventsPage() {
               {events?.map((event, index) => (
                 <article
                   key={event.id}
-                  className="animate-slide-up hover-glow relative clip-cyber border-l-4 border-l-amber-400 border border-purple-900/60 bg-black/60 p-6 shadow-lg shadow-purple-900/30"
+                  className="animate-slide-up hover-glow relative clip-cyber border-l-4 border-l-amber-400 border border-purple-900/60 bg-black/60 shadow-lg shadow-purple-900/30 overflow-hidden"
                 >
                   {/* Timeline dot */}
-                  <div className="absolute -left-[29px] top-6 h-3 w-3 rounded-full border-2 border-purple-900 bg-amber-400 shadow-lg shadow-amber-400/50" />
-                  
+                  <div className="absolute -left-[29px] top-6 h-3 w-3 rounded-full border-2 border-purple-900 bg-amber-400 shadow-lg shadow-amber-400/50 z-10" />
+
+                  {/* Event Banner Image */}
+                  {event.image_path && (
+                    <div className="relative aspect-[21/9] w-full overflow-hidden">
+                      <img
+                        src={`${SUPABASE_URL}/storage/v1/object/public/event-media/${event.image_path}`}
+                        alt={event.title}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    </div>
+                  )}
+
                   {/* currently not used due to lack of space */}
-                  {/* Classification badge */} 
+                  {/* Classification badge */}
                   {/* <span className="font-terminal absolute left-2 top-2 rounded bg-purple-800/50 px-2 py-1 text-[10px] text-amber-200">
                     EVENT-{String(index + 1).padStart(3, '0')}
                   </span> */
                   }
 
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between p-6">
                     <div className="flex flex-col gap-2 sm:max-w-xl">
                       <h2 className="rgb-hover text-xl font-semibold text-white">
                         <span className="font-terminal mr-2 text-sm text-purple-400">[MISSION]</span>
