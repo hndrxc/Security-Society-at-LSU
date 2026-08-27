@@ -24,38 +24,30 @@ const officers = [
       "Responsible for role and task delegation as well as overall management of club. Any uncertainty, ask me",
   },
   {
-    name: "Simeon Orji",
+    name: "Bennett Marceaux",
     role: "Vice President",
     team: "Officer",
-    photoPath: "CJ.png",
+    photoPath: "bennett.jpg",
     description:
-      "Responsible for assisting other members of the SSL board when they have tasks that require extra hands. I'm open to helping with any and all aspects of the club.",
+      "Responsible for communication between LSU, board, and members. This includes maintenance of newsletter and calendar. True president.",
   },
+  
   {
     name: "Carter Hendricks",
     role: "Web-Master",
     team: "Officer",
     photoPath: "cartergood.png",
     description:
-      "Guides the club's vision, coordinates with campus partners, and keeps every meeting focused on hands-on practice.",
+      "Responsible for maintaining the club's website and ensuring that all information is up to date. Also assists with any technical issues that may arise. ",
   },
   {
-    name: "Bennett Marceaux",
+    name: "Simeon Orji",
     role: "Secretary",
     team: "Officer",
-    photoPath: "bennett.jpg",
+    photoPath: "CJ.png",
     description:
-      "Responsible for communication between LSU, board, and members. This includes maintenance of newsletter and calendar.",
+      "Responsible for assisting other members of the SSL board when they have tasks that require extra hands. I'm open to helping with any and all aspects of the club.",
   },
-  {
-    name: "Ronald Gibson, III",
-    role: "Outreach Chair",
-    team: "just a guy",
-    photoPath: "ronald.png",
-    description:
-      "Secret leader of LSU's secret Cybersecurity cult and facilitator of communications between SSL and outside parties. Works heavily with other officers to ensure all the communications being done are benefiting some part of the club. Outside parties can include companies for talks/sponsorships, potential speakers, and more.",
-  },
- 
   {
     name: "Benito Mendoza",
     role: "Treasurer",
@@ -65,36 +57,52 @@ const officers = [
       "Responsible for SSL funds and fundraising",
   },
   {
-    name: "Chloe Phan",
-    role: "Graphics Designer/Social Media Lead",
-    team: "Officer",
-    photoPath: "chloe.jpg",
-    description:
-      "make graphic designs, manage socials",
-  },
-  {
-    name: "Jennifer Saldana",
-    role: "CTF Lead",
-    team: "CTF",
-    photoPath: "jennifer.png",
-    description:
-      "Responsible for organizing CTF meetings every week, CTF hackathons, and keeping track of national CTFs",
-  },
-  {
     name: "Taylor Graham",
-    role: "CTF Team",
-    team: "CTF",
+    role: "Outreach Chair",
+    team: "Officer",
     photoPath: "taylor.jpg",
     description:
-      "Responsible for helping to organize CTF meetings, future hackathons, and train for future CTF competitions",
+      "Works heavily with other officers to ensure all the communications being done are benefiting some part of the club. Outside parties can include companies for talks/sponsorships, potential speakers, and more.",
   },
   {
-    name: "Aeris Kelleher",
-    role: "CTF Team/WiCyS President",
-    team: "CTF/Collaborator",
-    photoPath: "aeris.png",
+    name: "Alyvia Whitney",
+    role: "Social Media Chair",
+    team: "Officer",
+    photoPath: "liv.png",
     description:
-      "Responsible for organizing Hello, Hacker! and helping to organize CTF meetings, future hackathons, and train for future CTF competitions",
+      "Responsible for managing the club's social media accounts and creating engaging content.",
+  },
+  {
+    name: "Adam Zumwalt",
+    role: "Ambassador",
+    team: "Ambassadors",
+    photoPath: "zed.png",
+    description:
+      "Ambassador for the club, responsible for representing the club at events and promoting the club to potential members.",
+  },
+  {
+    name: "Cole Cadarette",
+    role: "Ambassador",
+    team: "Ambassadors",
+    photoPath: "cole.jpg",
+    description:
+      "Ambassador for the club, responsible for representing the club at events and promoting the club to potential members.",
+  },
+  // {
+  //   name: "Aeris Kelleher",
+  //   role: "CTF Team/WiCyS President",
+  //   team: "CTF/Collaborator",
+  //   photoPath: "aeris.png",
+  //   description:
+  //     "Responsible for organizing Hello, Hacker! and helping to organize CTF meetings, future hackathons, and train for future CTF competitions",
+  // },
+  {
+    name: "Ronald Gibson, III",
+    role: "Senior Advisor",
+    team: "just a guy",
+    photoPath: "ronald.png",
+    description:
+      "Secret leader of LSU's secret Cybersecurity cult and facilitator of communications between SSL and outside parties.",
   },
   
 ];
