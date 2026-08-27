@@ -245,7 +245,7 @@ export default function PhishGame() {
           <p className={styles.completeKicker}>SCAN COMPLETE</p>
           <h3>{score} pts</h3>
           <p>
-            {score === 1000
+            {score === PHISH_SCENARIOS.length * 100
               ? `${playerName}, perfect read. Nothing slipped past you.`
               : `${playerName}, good instincts. The network is safer with you on it.`}
           </p>

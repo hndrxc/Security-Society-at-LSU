@@ -59,6 +59,7 @@ export const PHISH_SCENARIOS = [
     ],
     correctClue: 0,
   },
+  /* Temporarily disabled to keep the game at four questions.
   {
     type: "INCOMING PASSWORD ALERT",
     sender: "accounts@lsu.edu",
@@ -149,4 +150,5 @@ export const PHISH_SCENARIOS = [
     ],
     correctClue: 0,
   },
+  */
 ];
