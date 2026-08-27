@@ -40,6 +40,7 @@ A full-stack CTF competition platform and club website for the Security Society 
 ### Club Features
 - Event management with timezone-aware scheduling
 - Officer showcase and club information
+- Interactive browser-only “Spot the Phish” training exercise
 - Discord integration
 
 ---

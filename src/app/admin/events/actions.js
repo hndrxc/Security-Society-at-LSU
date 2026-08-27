@@ -3,6 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '../../../../utils/supabase/server'
 
+const STORAGE_BUCKET = 'event-media'
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+
 // Convert datetime-local value to ISO string with timezone
 function toISOWithTimezone(dateTimeLocal, timezone) {
   if (!dateTimeLocal) return null
@@ -61,6 +65,56 @@ async function requireAdmin() {
   return { supabase, user }
 }
 
+// Upload image to storage
+async function uploadEventImage(supabase, eventId, file) {
+  if (!file || !(file instanceof File) || file.size === 0) {
+    return null
+  }
+
+  // Validate file type
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    throw new Error('Invalid file type. Allowed: JPEG, PNG, WebP, GIF')
+  }
+
+  // Validate file size
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error('File too large. Maximum size is 5MB')
+  }
+
+  // Generate unique filename
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const timestamp = Date.now()
+  const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').slice(0, 50)
+  const storagePath = `${eventId}/${timestamp}-${safeName}`
+
+  // Upload to storage
+  const { error: uploadError } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .upload(storagePath, file, {
+      contentType: file.type,
+      upsert: false
+    })
+
+  if (uploadError) {
+    throw new Error(`Failed to upload image: ${uploadError.message}`)
+  }
+
+  return storagePath
+}
+
+// Delete image from storage
+async function deleteEventImage(supabase, imagePath) {
+  if (!imagePath) return
+
+  const { error } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .remove([imagePath])
+
+  if (error) {
+    console.error('Failed to delete image:', error.message)
+  }
+}
+
 // Create event
 export async function createEvent(prevState, formData) {
   try {
@@ -73,6 +127,7 @@ export async function createEvent(prevState, formData) {
     const timezone = formData.get('timezone')?.toString() || 'America/Chicago'
     const location = formData.get('location')?.toString().trim() || null
     const isVisible = formData.get('is_visible') === 'true'
+    const imageFile = formData.get('image')
 
     // Validation
     if (!title || !startsAtLocal) {
@@ -83,7 +138,7 @@ export async function createEvent(prevState, formData) {
     const startsAt = toISOWithTimezone(startsAtLocal, timezone)
     const endsAt = toISOWithTimezone(endsAtLocal, timezone)
 
-    // Insert event
+    // Insert event first to get the ID
     const { data, error } = await supabase
       .from('events')
       .insert({
@@ -101,6 +156,28 @@ export async function createEvent(prevState, formData) {
 
     if (error) {
       return { success: false, message: 'Failed to create event' }
+    }
+
+    // Upload image if provided
+    let imagePath = null
+    if (imageFile && imageFile instanceof File && imageFile.size > 0) {
+      try {
+        imagePath = await uploadEventImage(supabase, data.id, imageFile)
+        // Update event with image path
+        await supabase
+          .from('events')
+          .update({ image_path: imagePath })
+          .eq('id', data.id)
+      } catch (uploadError) {
+        // Event created but image failed - return partial success
+        revalidatePath('/admin/events')
+        revalidatePath('/events')
+        return {
+          success: true,
+          message: `Event created, but image upload failed: ${uploadError.message}`,
+          id: data.id
+        }
+      }
     }
 
     // Revalidate paths
@@ -126,6 +203,8 @@ export async function updateEvent(prevState, formData) {
     const timezone = formData.get('timezone')?.toString() || 'America/Chicago'
     const location = formData.get('location')?.toString().trim() || null
     const isVisible = formData.get('is_visible') === 'true'
+    const imageFile = formData.get('image')
+    const removeImage = formData.get('remove_image') === 'true'
 
     // Validation
     if (!id || !title || !startsAtLocal) {
@@ -135,6 +214,34 @@ export async function updateEvent(prevState, formData) {
     // Convert to UTC ISO strings
     const startsAt = toISOWithTimezone(startsAtLocal, timezone)
     const endsAt = toISOWithTimezone(endsAtLocal, timezone)
+
+    // Get current event to check for existing image
+    const { data: existingEvent } = await supabase
+      .from('events')
+      .select('image_path')
+      .eq('id', id)
+      .single()
+
+    let imagePath = existingEvent?.image_path || null
+
+    // Handle image removal
+    if (removeImage && imagePath) {
+      await deleteEventImage(supabase, imagePath)
+      imagePath = null
+    }
+
+    // Handle new image upload
+    if (imageFile && imageFile instanceof File && imageFile.size > 0) {
+      try {
+        // Delete old image first if exists
+        if (existingEvent?.image_path) {
+          await deleteEventImage(supabase, existingEvent.image_path)
+        }
+        imagePath = await uploadEventImage(supabase, id, imageFile)
+      } catch (uploadError) {
+        return { success: false, message: `Image upload failed: ${uploadError.message}` }
+      }
+    }
 
     // Update event
     const { error } = await supabase
@@ -147,6 +254,7 @@ export async function updateEvent(prevState, formData) {
         location,
         timezone,
         is_visible: isVisible,
+        image_path: imagePath,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
@@ -171,6 +279,19 @@ export async function deleteEvent(id) {
   try {
     const { supabase } = await requireAdmin()
 
+    // Get event to check for image
+    const { data: event } = await supabase
+      .from('events')
+      .select('image_path')
+      .eq('id', id)
+      .single()
+
+    // Delete image from storage if exists
+    if (event?.image_path) {
+      await deleteEventImage(supabase, event.image_path)
+    }
+
+    // Delete event
     const { error } = await supabase
       .from('events')
       .delete()

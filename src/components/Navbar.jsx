@@ -5,6 +5,7 @@ const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
   { href: "/ctf", label: "CTF" },
+  { href: "/QR", label: "Phish Lab" },
   { href: "/about", label: "About" },
 ];
 
