@@ -12,14 +12,14 @@ export const metadata = {
 };
 
 const DEFAULT_TIME_ZONE = "America/Chicago";
-const EVENT_COLUMNS = "id,title,description,starts_at,ends_at,location,timezone,image_path";
-const EVENT_COLUMNS_WITHOUT_TIMEZONE = "id,title,description,starts_at,ends_at,location,image_path";
+const EVENT_BASE_COLUMNS = ["id", "title", "description", "starts_at", "ends_at", "location"];
+const EVENT_OPTIONAL_COLUMNS = ["timezone", "image_path"];
 
-function isMissingTimezoneColumn(error) {
+function isMissingColumn(error, column) {
   return Boolean(
     error &&
       (error.code === "42703" || error.code === "PGRST204") &&
-      error.message?.includes("timezone"),
+      error.message?.includes(column),
   );
 }
 
@@ -33,12 +33,21 @@ function createVisibleEventsQuery(supabase, now, columns) {
 }
 
 async function getVisibleEvents(supabase, now) {
-  const result = await createVisibleEventsQuery(supabase, now, EVENT_COLUMNS);
+  const availableOptionalColumns = new Set(EVENT_OPTIONAL_COLUMNS);
+  let result;
 
-  // Migration 009 adds timezone. Keep event listings available while an
-  // environment is being upgraded instead of failing the entire query.
-  if (isMissingTimezoneColumn(result.error)) {
-    return createVisibleEventsQuery(supabase, now, EVENT_COLUMNS_WITHOUT_TIMEZONE);
+  // Migrations 009 and 010 add the optional display fields. Keep listings
+  // available while an environment is upgraded instead of failing all events.
+  for (let attempt = 0; attempt <= EVENT_OPTIONAL_COLUMNS.length; attempt += 1) {
+    const columns = [...EVENT_BASE_COLUMNS, ...availableOptionalColumns].join(",");
+    result = await createVisibleEventsQuery(supabase, now, columns);
+
+    const missingColumn = EVENT_OPTIONAL_COLUMNS.find(
+      (column) => availableOptionalColumns.has(column) && isMissingColumn(result.error, column),
+    );
+
+    if (!missingColumn) return result;
+    availableOptionalColumns.delete(missingColumn);
   }
 
   return result;

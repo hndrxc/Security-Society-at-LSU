@@ -187,12 +187,14 @@ Restart the development server after changing any `NEXT_PUBLIC_*` value because 
 
 ### 3. Apply database migrations
 
-Apply the SQL files in `supabase/migrations/` in numerical order, from `001_ctf_system.sql` through `009_add_events_timezone.sql`.
+Apply the SQL files in `supabase/migrations/` in numerical order, from `001_ctf_system.sql` through `010_ensure_event_image_path.sql`.
 
 > [!CAUTION]
 > Migration 003 recreates the `events` table. Review and adapt it before applying the migration sequence to a database that already contains event data.
 
 Migration 009 adds the `events.timezone` column used by the event form and public event schedule. Existing events default to `America/Chicago`.
+
+Migration 010 idempotently ensures `events.image_path` exists in environments where migration 008 was not applied.
 
 Migration 008 adds the event image path but does not create the Storage bucket. In Supabase Storage, create a public `event-media` bucket with:
 

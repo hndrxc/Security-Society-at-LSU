@@ -7,11 +7,11 @@ const STORAGE_BUCKET = 'event-media'
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
-function isMissingTimezoneColumn(error) {
+function isMissingColumn(error, column) {
   return Boolean(
     error &&
       (error.code === '42703' || error.code === 'PGRST204') &&
-      error.message?.includes('timezone')
+      error.message?.includes(column)
   )
 }
 
@@ -24,7 +24,7 @@ async function insertEvent(supabase, values) {
 
   // Migration 009 adds timezone. Retry without that optional field while an
   // environment is being upgraded so event management remains usable.
-  if (isMissingTimezoneColumn(result.error)) {
+  if (isMissingColumn(result.error, 'timezone')) {
     const legacyValues = { ...values }
     delete legacyValues.timezone
     result = await supabase
@@ -43,7 +43,7 @@ async function updateEventRow(supabase, id, values) {
     .update(values)
     .eq('id', id)
 
-  if (isMissingTimezoneColumn(result.error)) {
+  if (isMissingColumn(result.error, 'timezone')) {
     const legacyValues = { ...values }
     delete legacyValues.timezone
     result = await supabase
@@ -176,10 +176,29 @@ export async function createEvent(prevState, formData) {
     const location = formData.get('location')?.toString().trim() || null
     const isVisible = formData.get('is_visible') === 'true'
     const imageFile = formData.get('image')
+    const hasImageFile = imageFile instanceof File && imageFile.size > 0
 
     // Validation
     if (!title || !startsAtLocal) {
       return { success: false, message: 'Title and start date are required' }
+    }
+
+    if (hasImageFile) {
+      const { error: imageColumnError } = await supabase
+        .from('events')
+        .select('image_path')
+        .limit(0)
+
+      if (isMissingColumn(imageColumnError, 'image_path')) {
+        return {
+          success: false,
+          message: 'Event images are not configured yet. Apply database migration 010.'
+        }
+      }
+
+      if (imageColumnError) {
+        return { success: false, message: 'Unable to verify event image support' }
+      }
     }
 
     // Convert to UTC ISO strings
@@ -204,7 +223,7 @@ export async function createEvent(prevState, formData) {
 
     // Upload image if provided
     let imagePath = null
-    if (imageFile && imageFile instanceof File && imageFile.size > 0) {
+    if (hasImageFile) {
       try {
         imagePath = await uploadEventImage(supabase, data.id, imageFile)
         // Update event with image path
@@ -249,6 +268,7 @@ export async function updateEvent(prevState, formData) {
     const isVisible = formData.get('is_visible') === 'true'
     const imageFile = formData.get('image')
     const removeImage = formData.get('remove_image') === 'true'
+    const hasImageFile = imageFile instanceof File && imageFile.size > 0
 
     // Validation
     if (!id || !title || !startsAtLocal) {
@@ -260,11 +280,24 @@ export async function updateEvent(prevState, formData) {
     const endsAt = toISOWithTimezone(endsAtLocal, timezone)
 
     // Get current event to check for existing image
-    const { data: existingEvent } = await supabase
+    const { data: existingEvent, error: existingEventError } = await supabase
       .from('events')
       .select('image_path')
       .eq('id', id)
       .single()
+
+    const supportsImagePath = !isMissingColumn(existingEventError, 'image_path')
+
+    if (!supportsImagePath && (removeImage || hasImageFile)) {
+      return {
+        success: false,
+        message: 'Event images are not configured yet. Apply database migration 010.'
+      }
+    }
+
+    if (existingEventError && supportsImagePath) {
+      return { success: false, message: 'Unable to load the current event image' }
+    }
 
     let imagePath = existingEvent?.image_path || null
 
@@ -275,7 +308,7 @@ export async function updateEvent(prevState, formData) {
     }
 
     // Handle new image upload
-    if (imageFile && imageFile instanceof File && imageFile.size > 0) {
+    if (hasImageFile) {
       try {
         // Delete old image first if exists
         if (existingEvent?.image_path) {
@@ -288,7 +321,7 @@ export async function updateEvent(prevState, formData) {
     }
 
     // Update event
-    const { error } = await updateEventRow(supabase, id, {
+    const updateValues = {
       title,
       description,
       starts_at: startsAt,
@@ -296,9 +329,14 @@ export async function updateEvent(prevState, formData) {
       location,
       timezone,
       is_visible: isVisible,
-      image_path: imagePath,
       updated_at: new Date().toISOString()
-    })
+    }
+
+    if (supportsImagePath) {
+      updateValues.image_path = imagePath
+    }
+
+    const { error } = await updateEventRow(supabase, id, updateValues)
 
     if (error) {
       return { success: false, message: 'Failed to update event' }
