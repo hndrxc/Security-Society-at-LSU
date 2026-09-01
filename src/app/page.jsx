@@ -17,7 +17,7 @@ const highlights = [
   },
   {
     title: "Weekly Meetings",
-    detail: "We host Multiple levels of meeting throughout the week allowing members of all skill levels to learn.",
+    detail: "We meet every Friday from 6:00–7:30 PM in PFT 1225, with material for members of all skill levels.",
   },
 ];
 
@@ -89,7 +89,7 @@ export default async function Home() {
               Welcome to the Security Society at LSU. We are a Cybersecurity club that aims to equip students with the technical skills needed in today&apos;s cybersecurity landscape, and provide job opportunities by connecting them with industry professionals.
             </p>
             <p className="text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-              <span className="font-terminal text-amber-200">[LOCATION]</span> PFT 1240 on Mondays & Fridays @ 6:00-7:30
+              <span className="font-terminal text-amber-200">[MEETING]</span> Fridays from 6:00–7:30 PM in PFT 1225
               <br />
               <span className="font-terminal text-amber-200">[CONTACT]</span> securitysocietylsu@protonmail.com
             </p>

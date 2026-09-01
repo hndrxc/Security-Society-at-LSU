@@ -3,9 +3,7 @@ import LogoBadge from "@/components/LogoBadge";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/events", label: "Events" },
-  { href: "/ctf", label: "CTF" },
-  { href: "/QR", label: "Phish Lab" },
+  { href: "/events", label: "Events", aliases: ["/ctf"] },
   { href: "/about", label: "About" },
 ];
 
@@ -18,9 +16,11 @@ const MAX_WIDTH_CLASSES = {
  * Check if a route is active based on the current path.
  * Handles nested routes (e.g., /ctf/123 matches /ctf)
  */
-function isActiveRoute(href, currentPath) {
+function isActiveRoute(href, currentPath, aliases = []) {
   if (href === "/") return currentPath === "/";
-  return currentPath === href || currentPath.startsWith(href + "/");
+  return [href, ...aliases].some(
+    (route) => currentPath === route || currentPath.startsWith(route + "/"),
+  );
 }
 
 /**
@@ -61,8 +61,8 @@ export default function Navbar({ user, profile, currentPath, maxWidth = "5xl" })
 
       {/* Navigation */}
       <nav className="flex w-full flex-wrap items-center justify-center gap-3 text-sm font-semibold text-slate-200 sm:w-auto sm:justify-end">
-        {NAV_LINKS.map(({ href, label }) => {
-          const isActive = isActiveRoute(href, currentPath);
+        {NAV_LINKS.map(({ href, label, aliases }) => {
+          const isActive = isActiveRoute(href, currentPath, aliases);
           return (
             <Link
               key={href}

@@ -91,10 +91,10 @@ export default async function CompetitionPage({ params }) {
         {/* Back link */}
         <div className="mb-4">
           <Link
-            href="/ctf"
+            href="/events#ctf"
             className="font-terminal text-xs text-purple-400 hover:text-amber-300"
           >
-            ← Back to Competitions
+            ← Back to Events &amp; CTF
           </Link>
         </div>
 

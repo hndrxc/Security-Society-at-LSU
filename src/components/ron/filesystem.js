@@ -42,8 +42,7 @@ ctf-server.ssl.club ssh-ed25519 AAAAC3NzaC1lZDI1NTE5...
               type: 'file',
               content: `=== SSL Meeting Notes ===
 
-Tuesday meetings: PFT 1240 @ 6:00 PM
-Friday meetings: PFT 1212 @ 6:00 PM
+Friday meetings: PFT 1225 @ 6:00–7:30 PM
 
 Remember to:
 - Practice CTF challenges
@@ -154,8 +153,7 @@ founded = 2018
 location = "Baton Rouge, LA"
 
 [meetings]
-tuesday = "PFT 1240 @ 18:00"
-friday = "PFT 1212 @ 18:00"
+friday = "PFT 1225 @ 18:00-19:30"
 
 [contact]
 discord = "See website for invite"
