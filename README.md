@@ -2,160 +2,256 @@
 
 ![Next.js](https://img.shields.io/badge/Next.js_16-000?logo=nextdotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React_19-61DAFB?logo=react&logoColor=black)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_4-06B6D4?logo=tailwindcss&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-000?logo=vercel&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?logo=tailwindcss&logoColor=white)
+![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)
 
-A full-stack CTF competition platform and club website for the Security Society at LSU. Features real-time leaderboards, secure flag validation, multi-admin collaboration, and event management.
+The official web platform for the Security Society at LSU. It combines club information and event scheduling with a multi-competition Capture the Flag platform, authenticated player profiles, and protected administration tools.
 
-## 🔗 Live Site
+## Club Information
 
-**[cyberclublsu.com](https://cyberclublsu.com)**
-
----
+- **Website:** [www.cyberclublsu.com](https://www.cyberclublsu.com/)
+- **Meetings:** Fridays, 6:00–7:30 PM
+- **Location:** PFT 1225
+- **Contact:** [securitysocietylsu@protonmail.com](mailto:securitysocietylsu@protonmail.com)
 
 ## Features
 
-### CTF Platform
-- **Multi-competition support** with configurable start/end times
-- **8 challenge categories**: web, crypto, forensics, pwn, reversing, misc, osint, steganography
-- **4 difficulty levels**: easy, medium, hard, insane
-- **Secure flag validation** using SHA256 hashing—plaintext flags never stored
-- **Hint system** with configurable point costs and 10% minimum point preservation
-- **Real-time leaderboards** with first blood detection and solve-time tiebreakers
-- **Attempt limiting** and challenge visibility controls
+### Public club experience
 
-### Security
-- Row-Level Security (RLS) policies on all 8 database tables
-- Rate limiting middleware (10 req/min auth, 30 req/min submissions)
-- Content Security Policy headers
-- `SECURITY DEFINER` functions to prevent RLS bypass attacks
+- Combined events and CTF hub at `/events`
+- Timezone-aware event listings with optional banner images
+- About page with officer profiles loaded from Supabase Storage
+- Optional Discord server preview and invite link
+- Interactive “Spot the Phish” exercise at `/QR`
+- Hidden browser-based RON terminal easter egg
+- Responsive cyber-themed interface with reduced-motion support
 
-### Admin Tools
-- Dashboard with competition and submission statistics
-- CRUD for competitions, challenges, and events
-- Multi-admin collaboration with editor/viewer roles
-- Flag submission review interface
+### CTF platform
 
-### Club Features
-- Event management with timezone-aware scheduling
-- Officer showcase and club information
-- Interactive browser-only “Spot the Phish” training exercise
-- Discord integration
+- Multiple competitions with scheduled start/end times and active-state controls
+- Eight challenge categories: web, crypto, forensics, pwn, reversing, misc, OSINT, and steganography
+- Easy, medium, hard, and insane difficulty levels
+- Server-side flag verification with case-sensitive or case-insensitive matching
+- Expected challenge flags stored as SHA-256 hashes; submitted attempts retained for admin review
+- Up to three paid hints per challenge, with deductions capped so a solve retains at least 10% of its original value
+- Optional attempt limits, challenge attachments, challenge URLs, visibility controls, and custom ordering
+- Ranked leaderboards with solve-time tiebreakers and first-blood detection
+- Per-user solve and hint progress
 
----
+### Authentication and administration
+
+- Supabase email/password signup, login, logout, and password reset
+- User profiles with required username and full name before CTF participation
+- Admin dashboard with competition, challenge, submission, and success-rate statistics
+- Competition and challenge management
+- Event management with timezone conversion and image upload validation
+- Submission review with status filters and pagination
+- Competition owner, editor, and viewer collaboration roles
+- Admin routes protected by server-side authentication and profile checks
+
+### Security controls
+
+- Row-Level Security policies for profiles, CTF data, collaborators, solves, hints, submissions, and events
+- Database-side flag verification and scoring through PostgreSQL functions
+- `SECURITY DEFINER` helpers with fixed search paths for non-recursive authorization checks
+- Content Security Policy and additional browser security headers
+- Auth and CTF request throttling in middleware
+
+> [!NOTE]
+> The current rate limiter is an in-memory, per-instance implementation. It is suitable for development or a single long-lived instance, but production serverless deployments should replace it with a distributed store such as Redis or Vercel KV.
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|------------|
-| Framework | Next.js 16 (App Router) |
-| Frontend | React 19, TailwindCSS 4 |
-| Backend | Supabase (PostgreSQL, Auth, RLS) |
-| Deployment | Vercel |
-| Auth | Supabase Auth (email/password) |
+| --- | --- |
+| Framework | Next.js 16 App Router with React Compiler |
+| UI | React 19 and Tailwind CSS 4 |
+| Database | Supabase PostgreSQL with Row-Level Security |
+| Authentication | Supabase Auth through `@supabase/ssr` |
+| Storage | Supabase Storage for officer and event media |
+| Analytics | Vercel Analytics |
+| Deployment | Vercel; Docker development environment included |
 
----
+## Application Routes
 
-## Architecture
+| Route | Purpose |
+| --- | --- |
+| `/` | Club landing page and meeting information |
+| `/events` | Upcoming club events and CTF competitions |
+| `/ctf` | Redirects to the CTF section of `/events` |
+| `/ctf/[competitionId]` | Competition challenges, progress, and leaderboard preview |
+| `/ctf/[competitionId]/leaderboard` | Full competition leaderboard |
+| `/about` | Club information and officer profiles |
+| `/QR` | Interactive phishing-awareness exercise |
+| `/login` | Login, signup, and password-reset request |
+| `/account` | User profile management |
+| `/reset-password` | Password update after a reset email |
+| `/admin/*` | Protected event, competition, challenge, and submission management |
 
-```
+## Project Structure
+
+```text
 src/
-├── app/                    # 16 routes (App Router)
-│   ├── ctf/               # Competition pages
-│   ├── admin/             # Protected admin routes
-│   ├── events/            # Event listing
-│   └── login/             # Auth flows
-├── components/            # 18 React components
-└── hooks/                 # Custom hooks (auth, storage)
+├── app/                       # App Router pages, layouts, route handlers, and server actions
+│   ├── admin/                 # Protected administration console
+│   ├── auth/                  # Email confirmation and sign-out handlers
+│   ├── ctf/                   # Competition detail, leaderboard, and CTF actions
+│   ├── events/                # Combined public events and CTF hub
+│   └── QR/                    # Phishing-awareness exercise
+├── components/
+│   ├── admin/                 # Admin forms and controls
+│   ├── ctf/                   # Challenges, flags, hints, and leaderboards
+│   ├── phishing/              # Spot-the-Phish experience
+│   └── ron/                   # Hidden terminal and virtual filesystem
+└── hooks/                     # Client-side Supabase and Storage hooks
 
 utils/
-├── supabase/              # Client configs (server/client/middleware)
-└── auth/                  # Auth utilities
+├── auth/                      # Server-side auth/profile guards
+└── supabase/                  # Browser, server, and middleware clients
 
 supabase/
-└── migrations/            # 7 SQL migrations (schema, RLS, functions)
+└── migrations/                # Ordered PostgreSQL migrations 001–008
 ```
 
-### Database Schema
+## Database
 
-8 tables with comprehensive RLS policies:
+The migrations create seven application tables and extend an existing `profiles` table:
 
-- `profiles` — User metadata and admin flags
-- `ctf_competitions` — Competition configuration
-- `ctf_challenges` — Challenge data with hashed flags
-- `ctf_submissions` — Attempt logging with IP tracking
-- `ctf_solves` — Successful solves with point calculation
-- `ctf_hint_unlocks` — Hint purchase records
-- `ctf_competition_collaborators` — Multi-admin access
-- `events` — Club event scheduling
+| Table | Purpose |
+| --- | --- |
+| `profiles` | Usernames, names, email lookup, avatar metadata, and admin status |
+| `ctf_competitions` | Competition schedule, rules, state, and ownership |
+| `ctf_challenges` | Challenge content, flag hashes, hints, points, and limits |
+| `ctf_submissions` | Correct and incorrect player attempts |
+| `ctf_solves` | Successful solves and awarded points |
+| `ctf_hint_unlocks` | Per-user hint unlocks and point deductions |
+| `ctf_competition_collaborators` | Editor/viewer access to competitions |
+| `events` | Club event schedules, visibility, and image paths |
 
-### Key Database Functions
+Key PostgreSQL functions include:
 
-| Function | Purpose |
-|----------|---------|
-| `verify_ctf_flag()` | Validates submissions, calculates points, detects first blood |
-| `get_competition_leaderboard()` | Ranked query with solve-time tiebreaker |
-| `unlock_hint()` | Hint purchase with point deduction |
-| `hash_ctf_flag()` | SHA256 hashing for flag storage |
+- `hash_ctf_flag()`
+- `verify_ctf_flag()`
+- `get_competition_leaderboard()`
+- `unlock_hint()`
+- `is_admin()`
+- `is_competition_owner()`
+- `is_competition_collaborator()`
+- `is_competition_active()`
 
----
-
-## Getting Started
+## Local Development
 
 ### Prerequisites
-- Node.js 18+
-- Supabase project
 
-### Setup
+- Node.js 22 recommended, matching the included Docker image
+- npm and a Supabase project
+- An existing public `profiles` table keyed to `auth.users`
+
+The migrations expect `profiles` to support the fields used by the application, including `id`, `email`, `username`, `full_name`, `avatar_url`, and `is_admin`. The base `profiles` table/trigger is not created by this repository; migration 001 adds `is_admin` to an existing table.
+
+### 1. Install dependencies
 
 ```bash
-# Install dependencies
 npm install
+```
 
-# Configure environment
+### 2. Configure the environment
+
+```bash
 cp .env.example .env.local
 ```
 
-Add your Supabase credentials to `.env.local`:
+Required for the application:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 ```
-NEXT_PUBLIC_SUPABASE_URL=your_url
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_key
+
+Required for password-reset redirects:
+
+```env
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
+Optional integrations:
+
+```env
+NEXT_PUBLIC_DISCORD_SERVER_ID=your-discord-server-id
+NEXT_PUBLIC_DISCORD_INVITE=https://discord.gg/your-invite
+NEXT_PUBLIC_OFFICER_BUCKET=officers
+```
+
+Restart the development server after changing any `NEXT_PUBLIC_*` value because those values are included in the browser bundle at build time.
+
+### 3. Apply database migrations
+
+Apply the SQL files in `supabase/migrations/` in numerical order, from `001_ctf_system.sql` through `008_add_event_media.sql`.
+
+> [!CAUTION]
+> Migration 003 recreates the `events` table. Review and adapt it before applying the migration sequence to a database that already contains event data.
+
+The event forms and public event page expect a `timezone` column, but the current migration history does not add it. Until that schema change is captured in a migration, add it after migration 004:
+
+```sql
+ALTER TABLE events
+ADD COLUMN IF NOT EXISTS timezone TEXT DEFAULT 'America/Chicago';
+```
+
+Migration 008 adds the event image path but does not create the Storage bucket. In Supabase Storage, create a public `event-media` bucket with:
+
+- Maximum file size: 5 MB
+- Allowed types: JPEG, PNG, WebP, and GIF
+- Public read access
+- Authenticated admin insert, update, and delete policies
+
+Create the officer-photo bucket named by `NEXT_PUBLIC_OFFICER_BUCKET` separately and configure its read policy as needed.
+
+### 4. Configure authentication
+
+Add the local and deployed URLs to the Supabase Auth redirect allow list. Password-reset links return to `/reset-password`, and email confirmations return through `/auth/confirm`.
+
+To grant admin access, set `profiles.is_admin` to `true` for the appropriate user. Admin users must also have a completed username and full name.
+
+### 5. Run the application
+
 ```bash
-# Run development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000).
 
----
+## Available Commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Next.js development server |
+| `npm run build` | Create a production build |
+| `npm start` | Run the production build |
+| `npm run lint` | Run ESLint |
+
+### Docker development
+
+```bash
+docker compose up --build
+```
+
+The Compose configuration mounts the repository into the Node 22 container and exposes the application on port 3000.
 
 ## Deployment
 
-Deployed via Vercel Git integration. Set environment variables in Vercel dashboard:
+The production site is deployed through Vercel Git integration. Configure the same environment variables in the Vercel project and add the production domain to the Supabase Auth redirect allow list.
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- `NEXT_PUBLIC_SITE_URL`
-- `NEXT_PUBLIC_DISCORD_SERVER_ID`
-- `NEXT_PUBLIC_DISCORD_INVITE`
+For event images, create the `event-media` bucket and policies in the production Supabase project. For officer images, configure `NEXT_PUBLIC_OFFICER_BUCKET` and its corresponding bucket.
 
----
+The middleware rate limiter is not shared across Vercel instances; use a distributed implementation before treating it as a production-grade abuse control.
 
-## Stats
+## License
 
-- **58 source files**
-- **~7,300 lines** of frontend code
-- **~1,200 lines** of SQL migrations
-- **8 database tables** with RLS
-- **6 PL/pgSQL functions**
+Licensed under the [Apache License 2.0](LICENSE).
 
----
-
-## Author
+## Maintainer
 
 **Carter Hendricks** — Webmaster, Security Society at LSU
 
