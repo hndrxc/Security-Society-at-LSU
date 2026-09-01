@@ -12,6 +12,37 @@ export const metadata = {
 };
 
 const DEFAULT_TIME_ZONE = "America/Chicago";
+const EVENT_COLUMNS = "id,title,description,starts_at,ends_at,location,timezone,image_path";
+const EVENT_COLUMNS_WITHOUT_TIMEZONE = "id,title,description,starts_at,ends_at,location,image_path";
+
+function isMissingTimezoneColumn(error) {
+  return Boolean(
+    error &&
+      (error.code === "42703" || error.code === "PGRST204") &&
+      error.message?.includes("timezone"),
+  );
+}
+
+function createVisibleEventsQuery(supabase, now, columns) {
+  return supabase
+    .from("events")
+    .select(columns)
+    .eq("is_visible", true)
+    .or(`ends_at.gte.${now},and(ends_at.is.null,starts_at.gte.${now})`)
+    .order("starts_at", { ascending: true });
+}
+
+async function getVisibleEvents(supabase, now) {
+  const result = await createVisibleEventsQuery(supabase, now, EVENT_COLUMNS);
+
+  // Migration 009 adds timezone. Keep event listings available while an
+  // environment is being upgraded instead of failing the entire query.
+  if (isMissingTimezoneColumn(result.error)) {
+    return createVisibleEventsQuery(supabase, now, EVENT_COLUMNS_WITHOUT_TIMEZONE);
+  }
+
+  return result;
+}
 
 function formatDate(date, timeZone = DEFAULT_TIME_ZONE) {
   return new Intl.DateTimeFormat("en-US", {
@@ -44,15 +75,11 @@ function countByCompetition(rows) {
 export default async function EventsPage() {
   const supabase = await createClient();
   const now = new Date();
+  const nowIso = now.toISOString();
 
   const [auth, eventsResult, competitionsResult] = await Promise.all([
     getAuthData(),
-    supabase
-      .from("events")
-      .select("id,title,description,starts_at,ends_at,location,timezone,image_path")
-      .eq("is_visible", true)
-      .gte("ends_at", now.toISOString())
-      .order("starts_at", { ascending: true }),
+    getVisibleEvents(supabase, nowIso),
     supabase
       .from("ctf_competitions")
       .select("id,title,description,starts_at,ends_at,is_active")

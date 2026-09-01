@@ -7,6 +7,54 @@ const STORAGE_BUCKET = 'event-media'
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
+function isMissingTimezoneColumn(error) {
+  return Boolean(
+    error &&
+      (error.code === '42703' || error.code === 'PGRST204') &&
+      error.message?.includes('timezone')
+  )
+}
+
+async function insertEvent(supabase, values) {
+  let result = await supabase
+    .from('events')
+    .insert(values)
+    .select('id')
+    .single()
+
+  // Migration 009 adds timezone. Retry without that optional field while an
+  // environment is being upgraded so event management remains usable.
+  if (isMissingTimezoneColumn(result.error)) {
+    const legacyValues = { ...values }
+    delete legacyValues.timezone
+    result = await supabase
+      .from('events')
+      .insert(legacyValues)
+      .select('id')
+      .single()
+  }
+
+  return result
+}
+
+async function updateEventRow(supabase, id, values) {
+  let result = await supabase
+    .from('events')
+    .update(values)
+    .eq('id', id)
+
+  if (isMissingTimezoneColumn(result.error)) {
+    const legacyValues = { ...values }
+    delete legacyValues.timezone
+    result = await supabase
+      .from('events')
+      .update(legacyValues)
+      .eq('id', id)
+  }
+
+  return result
+}
+
 // Convert datetime-local value to ISO string with timezone
 function toISOWithTimezone(dateTimeLocal, timezone) {
   if (!dateTimeLocal) return null
@@ -139,20 +187,16 @@ export async function createEvent(prevState, formData) {
     const endsAt = toISOWithTimezone(endsAtLocal, timezone)
 
     // Insert event first to get the ID
-    const { data, error } = await supabase
-      .from('events')
-      .insert({
-        title,
-        description,
-        starts_at: startsAt,
-        ends_at: endsAt,
-        location,
-        timezone,
-        is_visible: isVisible,
-        created_by: user.id
-      })
-      .select('id')
-      .single()
+    const { data, error } = await insertEvent(supabase, {
+      title,
+      description,
+      starts_at: startsAt,
+      ends_at: endsAt,
+      location,
+      timezone,
+      is_visible: isVisible,
+      created_by: user.id
+    })
 
     if (error) {
       return { success: false, message: 'Failed to create event' }
@@ -244,20 +288,17 @@ export async function updateEvent(prevState, formData) {
     }
 
     // Update event
-    const { error } = await supabase
-      .from('events')
-      .update({
-        title,
-        description,
-        starts_at: startsAt,
-        ends_at: endsAt,
-        location,
-        timezone,
-        is_visible: isVisible,
-        image_path: imagePath,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
+    const { error } = await updateEventRow(supabase, id, {
+      title,
+      description,
+      starts_at: startsAt,
+      ends_at: endsAt,
+      location,
+      timezone,
+      is_visible: isVisible,
+      image_path: imagePath,
+      updated_at: new Date().toISOString()
+    })
 
     if (error) {
       return { success: false, message: 'Failed to update event' }

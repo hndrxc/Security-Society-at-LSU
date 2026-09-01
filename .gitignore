@@ -42,7 +42,12 @@ next-env.d.ts
 
 .sql
 
-/supabase
+# Keep local Supabase state out of Git, but track the migration that repairs
+# the event schema used by the application.
+/supabase/*
+!/supabase/migrations/
+/supabase/migrations/*
+!/supabase/migrations/009_add_events_timezone.sql
 
 # Claude Code context
 CLAUDE.md
