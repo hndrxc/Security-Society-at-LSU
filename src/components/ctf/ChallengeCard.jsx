@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Activity, useState, useId } from 'react'
+import { Badge, Feedback } from '@/components/ui/primitives'
 import FlagSubmitForm from './FlagSubmitForm'
 import HintButton from './HintButton'
 
@@ -28,28 +29,17 @@ export default function ChallengeCard({
   solveInfo,
   unlockedHints,
   isLoggedIn,
-  competitionActive
+  competitionActive,
+  onSolve
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [localSolved, setLocalSolved] = useState(isSolved)
-  const [localHints, setLocalHints] = useState(unlockedHints || [])
-
-  // Sync local state when props change (e.g., after page revalidation)
-  useEffect(() => {
-    setLocalSolved(isSolved)
-  }, [isSolved])
-
-  useEffect(() => {
-    setLocalHints(unlockedHints || [])
-  }, [unlockedHints])
-
-  const handleSolveSuccess = (result) => {
-    setLocalSolved(true)
-  }
-
-  const handleHintUnlock = (hintNumber, hintText) => {
-    setLocalHints([...localHints, { hint_number: hintNumber }])
-  }
+  const contentId = useId()
+  const [confirmedResult, setConfirmedResult] = useState(null)
+  const [addedHints, setAddedHints] = useState([])
+  const localSolved = isSolved || Boolean(confirmedResult)
+  const localHints = [...(unlockedHints || []), ...addedHints]
+  const handleSolveSuccess = (result) => { setConfirmedResult(result); onSolve?.(result) }
+  const handleHintUnlock = (hintNumber) => { setAddedHints(prev => [...prev, { hint_number: hintNumber }]) }
 
   const difficultyClass = difficultyColors[challenge.difficulty] || difficultyColors.medium
   const categoryIcon = categoryIcons[challenge.category?.toLowerCase()] || `[${challenge.category?.toUpperCase()}]`
@@ -64,17 +54,13 @@ export default function ChallengeCard({
     localHints.some(h => h.hint_number === hintNumber)
 
   return (
-    <div
-      className={`clip-cyber border transition-all ${
-        localSolved
-          ? 'border-[#39ff14]/50 bg-[#39ff14]/5'
-          : 'border-purple-900/60 bg-black/60 hover:border-purple-500/60'
-      }`}
-    >
+    <div className="lab-challenge" data-solved={localSolved}>
       {/* Header - Always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex w-full items-start justify-between p-4 text-left"
+        className="lab-challenge-trigger"
+        aria-expanded={isExpanded}
+        aria-controls={contentId}
       >
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -83,7 +69,7 @@ export default function ChallengeCard({
               {challenge.title}
             </h3>
             {localSolved && (
-              <span className="font-terminal text-xs text-[#39ff14]">[SOLVED]</span>
+              <Badge tone="active">Solved</Badge>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -103,8 +89,8 @@ export default function ChallengeCard({
       </button>
 
       {/* Expanded content */}
-      {isExpanded && (
-        <div className="border-t border-purple-900/40 p-4 pt-0">
+      <Activity mode={isExpanded ? 'visible' : 'hidden'}>
+        <div id={contentId} className="lab-challenge-content">
           <div className="mt-4 space-y-4">
             {/* Description */}
             <div className="prose prose-invert prose-sm max-w-none">
@@ -168,6 +154,7 @@ export default function ChallengeCard({
               </div>
             )}
 
+            {confirmedResult && <Feedback tone="success">{confirmedResult.message}{confirmedResult.pointsAwarded > 0 && ` +${confirmedResult.pointsAwarded} pts`}{confirmedResult.firstBlood && ' · FIRST BLOOD!'}</Feedback>}
             {/* Solve info */}
             {localSolved && solveInfo && (
               <div className="font-terminal rounded border border-[#39ff14]/30 bg-[#39ff14]/5 p-3 text-xs">
@@ -203,7 +190,7 @@ export default function ChallengeCard({
             )}
           </div>
         </div>
-      )}
+      </Activity>
     </div>
   )
 }
