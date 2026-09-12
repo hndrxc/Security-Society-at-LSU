@@ -84,8 +84,8 @@ export default async function KernelsPage() {
       <aside className={styles.note} aria-label="Suggest a Kernel">
         <p>Have a different cyber niche in mind?</p>
         <p className="lab-muted">
-          Bring your idea to the club. The GBM highlighted AI security research,
-          video game hacking, and spacecraft hacking as possibilities for future Kernels.
+          Bring your idea to the club. Could be AI security research,
+          video game hacking, spacecraft hacking, or anything else as possibilities for future Kernels.
         </p>
         <ActionLink href="mailto:securitysocietylsu@protonmail.com" variant="secondary">
           Share a Kernel idea <span aria-hidden="true">↗</span>
