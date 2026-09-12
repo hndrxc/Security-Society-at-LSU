@@ -2,6 +2,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { createClient } from "../../utils/supabase/server";
 // import SnowfallEffect from "@/components/SnowfallEffect";
+
+export const revalidate = 60;
 const highlights = [
   {
     title: "Community-first Programs",
@@ -33,9 +35,24 @@ const discordInvite = process.env.NEXT_PUBLIC_DISCORD_INVITE;
 export default async function Home() {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const now = new Date().toISOString();
+  const [
+    {
+      data: { user },
+    },
+    { data: activeEvent },
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from("events")
+      .select("id,title,location,ends_at")
+      .eq("is_visible", true)
+      .lte("starts_at", now)
+      .gte("ends_at", now)
+      .order("ends_at", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
   // Fetch user profile if logged in
   let profile = null;
@@ -93,6 +110,34 @@ export default async function Home() {
               <br />
               <span className="font-terminal text-amber-200">[CONTACT]</span> securitysocietylsu@protonmail.com
             </p>
+            {activeEvent && (
+              <aside
+                aria-label="Live event CTF access"
+                className="clip-cyber border border-[#39ff14]/60 bg-[#39ff14]/10 p-4 shadow-lg shadow-[#39ff14]/10 sm:p-5"
+              >
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="font-terminal flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#39ff14] sm:justify-start">
+                      <span className="h-2 w-2 animate-pulse rounded-full bg-[#39ff14]" aria-hidden="true" />
+                      [Live Event] CTF Access Online
+                    </p>
+                    <h2 className="mt-1 truncate text-lg font-semibold text-white">{activeEvent.title}</h2>
+                    {activeEvent.location && (
+                      <p className="font-terminal text-sm text-slate-300">
+                        <span className="text-slate-500">LOC:</span> {activeEvent.location}
+                      </p>
+                    )}
+                  </div>
+                  <Link
+                    href="/ctf"
+                    className="pulse-glow inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#39ff14] px-5 py-2.5 text-sm font-bold text-black shadow-lg shadow-[#39ff14]/20 transition-transform hover:-translate-y-0.5 hover:text-black"
+                  >
+                    Open CTF
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
+              </aside>
+            )}
             <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start sm:gap-4">
               <a
                 className="pulse-glow rounded-full bg-amber-400 px-5 py-2.5 text-sm font-semibold text-black shadow-lg shadow-amber-500/30 transition-transform hover:-translate-y-0.5 hover:shadow-xl sm:px-6 sm:py-3"
