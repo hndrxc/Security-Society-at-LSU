@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const path = require('node:path');
 const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
 const { transformSync } = require('next/dist/build/swc');
@@ -24,7 +25,16 @@ function load(file, mocks = {}) {
   vm.runInNewContext(code, {
     exports, process: { env: {} }, File, console,
     Date: class extends Date { constructor(...args) { super(...(args.length ? args : [now])); } },
-    require: (name) => Object.hasOwn(mocks, name) ? mocks[name] : require(name),
+    require: (name) => {
+      if (Object.hasOwn(mocks, name)) return mocks[name];
+      if (name === '@/components/ui/Reveal') return ({ children }) => children;
+      if (name.startsWith('@/') || name.startsWith('.')) {
+        let target = name.startsWith('@/') ? path.join('src', name.slice(2)) : path.join(path.dirname(file), name);
+        if (!path.extname(target)) target += fs.existsSync(target + '.jsx') ? '.jsx' : '.js';
+        return load(target, mocks);
+      }
+      return require(name);
+    },
   });
   return exports;
 }

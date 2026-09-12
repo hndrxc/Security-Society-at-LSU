@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import LogoBadge from "@/components/LogoBadge";
+import AuthFrame from "@/components/layout/AuthFrame";
+import { Feedback } from "@/components/ui/primitives";
 import { createClient } from "../../../utils/supabase/client";
 
 export default function ResetPasswordPage() {
@@ -14,22 +15,7 @@ export default function ResetPasswordPage() {
 }
 
 function ResetPasswordFallback() {
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-[#0d0a14] to-black text-slate-100">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-purple-700/40 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 right-[-80px] h-72 w-72 rounded-full bg-amber-500/30 blur-3xl" />
-
-      <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center px-6 py-12">
-        <div className="w-full max-w-xl rounded-3xl border border-purple-900/50 bg-[#0f0d16]/90 p-10 text-center shadow-2xl shadow-purple-900/40 backdrop-blur">
-          <div className="flex flex-col items-center gap-3">
-            <LogoBadge size={48} className="shrink-0" priority />
-            <h1 className="text-2xl font-semibold text-white">Loading reset page…</h1>
-            <p className="text-sm text-slate-300">Hold on while we prepare your reset link.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <AuthFrame title="Reset your password" description="Hold on while we prepare your reset link."><p role="status">Loading reset page…</p></AuthFrame>;
 }
 
 function ResetPasswordContent() {
@@ -126,23 +112,12 @@ function ResetPasswordContent() {
     }
   };
 
-  const inputClasses =
-    "w-full rounded-xl border border-purple-900/60 bg-black/40 px-4 py-3 text-slate-100 placeholder-slate-500 shadow-inner shadow-purple-900/20 focus:border-amber-400 focus:outline-none focus:ring focus:ring-amber-300/30";
-  const labelClasses = "text-sm font-semibold text-amber-200";
+  const inputClasses = "lab-input";
+  const labelClasses = "text-sm font-medium";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-[#0d0a14] to-black text-slate-100">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-purple-700/40 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 right-[-80px] h-72 w-72 rounded-full bg-amber-500/30 blur-3xl" />
-
-      <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center px-6 py-12">
-        <div className="w-full max-w-xl rounded-3xl border border-purple-900/50 bg-[#0f0d16]/90 p-10 shadow-2xl shadow-purple-900/40 backdrop-blur">
-          <div className="flex flex-col items-center gap-3 text-center">
-            <LogoBadge size={48} className="shrink-0" priority />
-            <h1 className="text-2xl font-semibold text-white">Reset your password</h1>
-            <p className="text-sm text-slate-300">Set a new password to get back into your account.</p>
-          </div>
-
+    <AuthFrame title="Reset your password" description="Set a new password to get back into your account.">
+      <p className="lab-eyebrow">Account recovery</p><h2>Choose a new password.</h2>
           <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <label className={labelClasses} htmlFor="password">
@@ -178,9 +153,7 @@ function ResetPasswordContent() {
             </div>
 
             {status?.message && (
-              <p className={`text-sm ${status.type === "error" ? "text-rose-300" : "text-amber-200"}`}>
-                {status.message}
-              </p>
+              <Feedback tone={status.type}>{status.message}</Feedback>
             )}
             {!status && !sessionReady && !checking && (
               <p className="text-sm text-rose-300">
@@ -191,21 +164,19 @@ function ResetPasswordContent() {
             <div className="flex flex-col gap-3 pt-1">
               <button
                 type="submit"
-                className="inline-flex w-full items-center justify-center rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-black shadow-lg shadow-amber-500/30 transition-transform hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
+                className="lab-button lab-button--primary w-full"
                 disabled={loading}
               >
                 {loading ? "Updating..." : "Update password"}
               </button>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center rounded-xl border border-purple-500/60 px-4 py-3 text-sm font-semibold text-purple-100 transition-colors hover:border-purple-400 hover:bg-purple-600 hover:text-white"
+                className="lab-button lab-button--secondary w-full"
               >
                 Back to login
               </Link>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
+    </AuthFrame>
   );
 }

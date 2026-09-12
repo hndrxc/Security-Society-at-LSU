@@ -1,4 +1,5 @@
 "use client";
+import { Feedback } from "@/components/ui/primitives";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "../../../utils/supabase/client";
@@ -29,9 +30,8 @@ export default function AccountForm({ user, isProfileIncomplete = false }) {
   const [status, setStatus] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
 
-  const inputClasses =
-    "w-full rounded-xl border border-purple-900/60 bg-black/40 px-4 py-3 text-slate-100 placeholder-slate-500 shadow-inner shadow-purple-900/20 focus:border-amber-400 focus:outline-none focus:ring focus:ring-amber-300/30";
-  const labelClasses = "text-sm font-semibold text-amber-200";
+  const inputClasses = "lab-input";
+  const labelClasses = "text-sm font-medium";
 
   const getProfile = useCallback(async () => {
     try {
@@ -114,7 +114,7 @@ export default function AccountForm({ user, isProfileIncomplete = false }) {
 
   return (
     <div className="space-y-6">
-      {isProfileIncomplete && (
+      {isProfileIncomplete && status?.type !== "success" && (
         <div className="border border-amber-400/50 bg-amber-500/10 p-4 rounded-lg">
           <p className="font-terminal text-sm text-amber-200">
             <span className="text-amber-400">[REQUIRED]</span>
@@ -139,6 +139,8 @@ export default function AccountForm({ user, isProfileIncomplete = false }) {
           Full Name <span className="text-rose-400">*</span>
         </label>
         <input
+          aria-invalid={Boolean(validationErrors.fullname)}
+          autoComplete="name"
           id="fullName"
           type="text"
           value={fullname}
@@ -147,7 +149,7 @@ export default function AccountForm({ user, isProfileIncomplete = false }) {
           placeholder="Add your name"
         />
         {validationErrors.fullname && (
-          <p className="text-xs text-rose-400">{validationErrors.fullname}</p>
+          <p role="alert" className="text-xs text-rose-400">{validationErrors.fullname}</p>
         )}
       </div>
       <div className="grid gap-2">
@@ -155,6 +157,8 @@ export default function AccountForm({ user, isProfileIncomplete = false }) {
           Username <span className="text-rose-400">*</span>
         </label>
         <input
+          aria-invalid={Boolean(validationErrors.username)}
+          autoComplete="username"
           id="username"
           type="text"
           value={username}
@@ -165,24 +169,18 @@ export default function AccountForm({ user, isProfileIncomplete = false }) {
           title="3-30 characters, letters, numbers, underscore, or hyphen"
         />
         {validationErrors.username && (
-          <p className="text-xs text-rose-400">{validationErrors.username}</p>
+          <p role="alert" className="text-xs text-rose-400">{validationErrors.username}</p>
         )}
       </div>
 
       {status?.message && (
-        <p
-          className={`text-sm ${
-            status.type === "error" ? "text-rose-300" : "text-amber-200"
-          }`}
-        >
-          {status.message}
-        </p>
+        <Feedback tone={status.type}>{status.message}</Feedback>
       )}
 
       <div className="flex flex-wrap gap-3 pt-2">
         <button
           type="button"
-          className="inline-flex flex-1 items-center justify-center rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-black shadow-lg shadow-amber-500/30 transition-transform hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
+          className="lab-button lab-button--primary w-full"
           onClick={() => updateProfile({ fullname, username })}
           disabled={loading}
         >
@@ -190,7 +188,7 @@ export default function AccountForm({ user, isProfileIncomplete = false }) {
         </button>
         <form action={signOut} className="flex-1">
           <button
-            className="inline-flex w-full items-center justify-center rounded-xl border border-purple-500/60 px-4 py-3 text-sm font-semibold text-purple-100 transition-colors hover:border-purple-400 hover:bg-purple-600 hover:text-white"
+            className="lab-button lab-button--secondary w-full"
             type="submit"
           >
             Sign out

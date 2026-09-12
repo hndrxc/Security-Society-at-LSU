@@ -32,7 +32,7 @@ export default async function AdminLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-[#0d0a14] to-black text-slate-100">
+    <div className="lab-admin min-h-screen text-slate-100">
       {/* Admin header */}
       <header className="border-b border-purple-900/50 bg-black/80 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
@@ -90,7 +90,7 @@ export default async function AdminLayout({ children }) {
       </nav>
 
       {/* Main content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <main id="main-content" className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {children}
       </main>
     </div>

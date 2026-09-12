@@ -1,11 +1,12 @@
 'use client'
+import './globals.css'
 
 export default function GlobalError({ error, reset }) {
   return (
     <html lang="en">
       <body className="min-h-screen bg-black text-slate-100">
         <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6 py-16">
-          <div className="w-full rounded-3xl border border-rose-800/50 bg-[#130d17]/90 p-10 text-center shadow-2xl">
+          <main id="main-content" className="lab-panel lab-error">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-500/15 text-rose-200 ring-2 ring-rose-600/40">
               <span className="text-2xl font-semibold">!</span>
             </div>
@@ -21,12 +22,12 @@ export default function GlobalError({ error, reset }) {
             <div className="mt-8">
               <button
                 onClick={() => reset()}
-                className="inline-flex min-w-[160px] items-center justify-center rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-black shadow-lg transition-transform hover:-translate-y-0.5"
+                className="lab-button lab-button--primary"
               >
                 Try again
               </button>
             </div>
-          </div>
+          </main>
         </div>
       </body>
     </html>
