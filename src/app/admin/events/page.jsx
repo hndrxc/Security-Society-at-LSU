@@ -1,31 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "../../../../utils/supabase/server";
-
-// Helper to verify admin authorization
-async function requireAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.is_admin) {
-    redirect("/");
-  }
-
-  return supabase;
-}
+import { requireAdminPage } from "../../../../utils/auth/requireAdmin";
 
 export default async function EventsPage() {
-  const supabase = await requireAdmin();
+  const { supabase } = await requireAdminPage();
 
   const [{ data: events }, { data: competitions }] = await Promise.all([
     supabase.from("events").select("*").order("starts_at", { ascending: false }),
@@ -84,7 +61,7 @@ export default async function EventsPage() {
                       <h2 className="text-lg font-semibold text-white">{event.title}</h2>
                       <span className={`rounded px-2 py-0.5 font-terminal text-xs ${
                         event.is_visible
-                          ? 'bg-[#39ff14]/20 text-[#39ff14]'
+                          ? 'bg-[var(--cyber-green)]/20 text-[var(--cyber-green)]'
                           : 'bg-slate-500/20 text-slate-400'
                       }`}>
                         {event.is_visible ? 'VISIBLE' : 'HIDDEN'}

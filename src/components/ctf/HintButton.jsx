@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { unlockHint } from '@/app/ctf/actions'
+import { useState } from "react";
+import { unlockHint } from "@/app/ctf/actions";
 
 export default function HintButton({
   challengeId,
@@ -9,37 +9,37 @@ export default function HintButton({
   cost,
   isUnlocked,
   isLoggedIn,
-  onUnlock
+  onUnlock,
 }) {
-  const [loading, setLoading] = useState(false)
-  const [hintText, setHintText] = useState(null)
-  const [error, setError] = useState(null)
-  const [showHint, setShowHint] = useState(isUnlocked)
+  const [loading, setLoading] = useState(false);
+  const [hintText, setHintText] = useState(null);
+  const [error, setError] = useState(null);
+  const [showHint, setShowHint] = useState(isUnlocked);
 
   const handleUnlock = async () => {
-    if (!isLoggedIn) return
+    if (!isLoggedIn) return;
 
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
-    const formData = new FormData()
-    formData.set('challengeId', challengeId)
-    formData.set('hintNumber', hintNumber.toString())
+    const formData = new FormData();
+    formData.set("challengeId", challengeId);
+    formData.set("hintNumber", hintNumber.toString());
 
-    const result = await unlockHint(null, formData)
+    const result = await unlockHint(null, formData);
 
-    setLoading(false)
+    setLoading(false);
 
     if (result.success) {
-      setHintText(result.hintText)
-      setShowHint(true)
+      setHintText(result.hintText);
+      setShowHint(true);
       if (onUnlock) {
-        onUnlock(hintNumber, result.hintText)
+        onUnlock(hintNumber, result.hintText);
       }
     } else {
-      setError(result.message)
+      setError(result.message);
     }
-  }
+  };
 
   if (showHint && hintText) {
     return (
@@ -49,7 +49,7 @@ export default function HintButton({
         </div>
         <p className="text-sm text-slate-300">{hintText}</p>
       </div>
-    )
+    );
   }
 
   if (showHint && !hintText) {
@@ -60,9 +60,9 @@ export default function HintButton({
         disabled={loading}
         className="rounded border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 font-terminal text-xs text-purple-300 transition-colors hover:bg-purple-500/20 disabled:opacity-50"
       >
-        {loading ? 'Loading...' : `View Hint ${hintNumber}`}
+        {loading ? "Loading..." : `View Hint ${hintNumber}`}
       </button>
-    )
+    );
   }
 
   return (
@@ -72,17 +72,21 @@ export default function HintButton({
         disabled={loading || !isLoggedIn}
         className="rounded border border-slate-600/50 bg-slate-700/30 px-3 py-1.5 font-terminal text-xs text-slate-400 transition-colors hover:bg-slate-600/30 hover:text-slate-300 disabled:opacity-50"
       >
-        {loading ? 'Unlocking...' : (
+        {loading ? (
+          "Unlocking..."
+        ) : (
           <>
             Hint {hintNumber}
-            {cost > 0 && <span className="ml-1 text-rose-400">(-{cost} pts)</span>}
-            {cost === 0 && <span className="ml-1 text-[#39ff14]">(free)</span>}
+            {cost > 0 && (
+              <span className="ml-1 text-rose-400">(-{cost} pts)</span>
+            )}
+            {cost === 0 && (
+              <span className="ml-1 text-[var(--cyber-green)]">(free)</span>
+            )}
           </>
         )}
       </button>
-      {error && (
-        <span className="text-xs text-rose-400">{error}</span>
-      )}
+      {error && <span className="text-xs text-rose-400">{error}</span>}
     </div>
-  )
+  );
 }

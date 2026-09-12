@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import LogoBadge from "@/components/LogoBadge";
+import AuthFrame from "@/components/layout/AuthFrame";
+import { Feedback } from "@/components/ui/primitives";
 import { createClient } from "../../../utils/supabase/client";
 
 export default function ResetPasswordPage() {
@@ -15,20 +16,12 @@ export default function ResetPasswordPage() {
 
 function ResetPasswordFallback() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-[#0d0a14] to-black text-slate-100">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-purple-700/40 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 right-[-80px] h-72 w-72 rounded-full bg-amber-500/30 blur-3xl" />
-
-      <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center px-6 py-12">
-        <div className="w-full max-w-xl rounded-3xl border border-purple-900/50 bg-[#0f0d16]/90 p-10 text-center shadow-2xl shadow-purple-900/40 backdrop-blur">
-          <div className="flex flex-col items-center gap-3">
-            <LogoBadge size={48} className="shrink-0" priority />
-            <h1 className="text-2xl font-semibold text-white">Loading reset page…</h1>
-            <p className="text-sm text-slate-300">Hold on while we prepare your reset link.</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <AuthFrame
+      title="Reset your password"
+      description="Hold on while we prepare your reset link."
+    >
+      <p role="status">Loading reset page…</p>
+    </AuthFrame>
   );
 }
 
@@ -46,10 +39,12 @@ function ResetPasswordContent() {
     let ignore = false;
 
     // Listen for auth state changes (PASSWORD_RECOVERY event fires when user clicks reset link)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (ignore) return;
 
-      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
         if (session) {
           setSessionReady(true);
           setChecking(false);
@@ -60,7 +55,9 @@ function ResetPasswordContent() {
     // Also check if there's already a valid session (handles page refresh)
     const checkExistingSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (!ignore) {
           if (session) {
             setSessionReady(true);
@@ -88,13 +85,17 @@ function ResetPasswordContent() {
     if (!sessionReady) {
       setStatus({
         type: "error",
-        message: "This link is expired or invalid. Request a new reset email to continue.",
+        message:
+          "This link is expired or invalid. Request a new reset email to continue.",
       });
       return;
     }
 
     if (!password || password.length < 8) {
-      setStatus({ type: "error", message: "Password must be at least 8 characters." });
+      setStatus({
+        type: "error",
+        message: "Password must be at least 8 characters.",
+      });
       return;
     }
 
@@ -110,102 +111,104 @@ function ResetPasswordContent() {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        setStatus({ type: "error", message: "Could not update password. Please try again." });
+        setStatus({
+          type: "error",
+          message: "Could not update password. Please try again.",
+        });
       } else {
         setStatus({
           type: "success",
-          message: "Password updated. You can log in with your new password now.",
+          message:
+            "Password updated. You can log in with your new password now.",
         });
         setPassword("");
         setConfirmPassword("");
       }
     } catch {
-      setStatus({ type: "error", message: "Something went wrong. Please try again." });
+      setStatus({
+        type: "error",
+        message: "Something went wrong. Please try again.",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const inputClasses =
-    "w-full rounded-xl border border-purple-900/60 bg-black/40 px-4 py-3 text-slate-100 placeholder-slate-500 shadow-inner shadow-purple-900/20 focus:border-amber-400 focus:outline-none focus:ring focus:ring-amber-300/30";
-  const labelClasses = "text-sm font-semibold text-amber-200";
+  const inputClasses = "lab-input";
+  const labelClasses = "text-sm font-medium";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-[#0d0a14] to-black text-slate-100">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-purple-700/40 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 right-[-80px] h-72 w-72 rounded-full bg-amber-500/30 blur-3xl" />
-
-      <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center px-6 py-12">
-        <div className="w-full max-w-xl rounded-3xl border border-purple-900/50 bg-[#0f0d16]/90 p-10 shadow-2xl shadow-purple-900/40 backdrop-blur">
-          <div className="flex flex-col items-center gap-3 text-center">
-            <LogoBadge size={48} className="shrink-0" priority />
-            <h1 className="text-2xl font-semibold text-white">Reset your password</h1>
-            <p className="text-sm text-slate-300">Set a new password to get back into your account.</p>
-          </div>
-
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <label className={labelClasses} htmlFor="password">
-                New password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className={inputClasses}
-                placeholder="Choose something strong"
-                disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className={labelClasses} htmlFor="confirmPassword">
-                Confirm password
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                className={inputClasses}
-                placeholder="Re-enter your password"
-                disabled={loading}
-              />
-            </div>
-
-            {status?.message && (
-              <p className={`text-sm ${status.type === "error" ? "text-rose-300" : "text-amber-200"}`}>
-                {status.message}
-              </p>
-            )}
-            {!status && !sessionReady && !checking && (
-              <p className="text-sm text-rose-300">
-                We could not confirm this reset request. Please send a new email and try again.
-              </p>
-            )}
-
-            <div className="flex flex-col gap-3 pt-1">
-              <button
-                type="submit"
-                className="inline-flex w-full items-center justify-center rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-black shadow-lg shadow-amber-500/30 transition-transform hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
-                disabled={loading}
-              >
-                {loading ? "Updating..." : "Update password"}
-              </button>
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center rounded-xl border border-purple-500/60 px-4 py-3 text-sm font-semibold text-purple-100 transition-colors hover:border-purple-400 hover:bg-purple-600 hover:text-white"
-              >
-                Back to login
-              </Link>
-            </div>
-          </form>
+    <AuthFrame
+      title="Reset your password"
+      description="Set a new password to get back into your account."
+    >
+      <p className="lab-eyebrow">Account recovery</p>
+      <h2>Choose a new password.</h2>
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        <div className="space-y-2">
+          <label className={labelClasses} htmlFor="password">
+            New password
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className={inputClasses}
+            placeholder="Choose something strong"
+            disabled={loading}
+          />
         </div>
-      </div>
-    </div>
+        <div className="space-y-2">
+          <label className={labelClasses} htmlFor="confirmPassword">
+            Confirm password
+          </label>
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            className={inputClasses}
+            placeholder="Re-enter your password"
+            disabled={loading}
+          />
+        </div>
+
+        {status?.message && (
+          <Feedback tone={status.type}>{status.message}</Feedback>
+        )}
+        {!status && !sessionReady && !checking && (
+          <p className="text-sm text-rose-300">
+            We could not confirm this reset request. Please send a new email and
+            try again.
+          </p>
+        )}
+
+        <div className="flex flex-col gap-3 pt-1">
+          <button
+            type="submit"
+            className="lab-button lab-button--primary w-full"
+            disabled={loading || checking || !sessionReady}
+          >
+            {checking
+              ? "Checking session..."
+              : loading
+                ? "Updating..."
+                : "Update password"}
+          </button>
+          <Link
+            href="/login"
+            prefetch={false}
+            className="lab-button lab-button--secondary w-full"
+          >
+            Back to login
+          </Link>
+        </div>
+      </form>
+    </AuthFrame>
   );
 }

@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { createCommandHandler } from './commands';
 import TerminalDisplay from './TerminalDisplay';
 import CommandInput from './CommandInput';
+import { useSupabaseProfile } from '@/hooks/useSupabaseProfile';
+import './ron.css';
 
 const BOOT_SEQUENCE = [
   { text: 'RON_OS v1.0.0 - Security Society at LSU', delay: 100 },
@@ -18,7 +20,13 @@ const BOOT_SEQUENCE = [
   { text: '', delay: 50 },
 ];
 
-export default function RonConsole({ username = 'hacker', onClose }) {
+export default function RonConsole({ onClose }) {
+  const { user, profile } = useSupabaseProfile();
+  const username = profile?.username
+    || user?.user_metadata?.username
+    || user?.user_metadata?.name
+    || user?.email?.split('@')[0]
+    || 'hacker';
   const [history, setHistory] = useState([]);
   const [commandHistory, setCommandHistory] = useState([]);
   const [isBooting, setIsBooting] = useState(true);
@@ -29,24 +37,21 @@ export default function RonConsole({ username = 'hacker', onClose }) {
 
   // Boot sequence animation
   useEffect(() => {
-    let mounted = true;
     let totalDelay = 0;
 
-    BOOT_SEQUENCE.forEach((line) => {
+    const timers = BOOT_SEQUENCE.map((line) => {
       totalDelay += line.delay;
-      setTimeout(() => {
-        if (!mounted) return;
+      return setTimeout(() => {
         setBootLines((prev) => [...prev, line.text]);
       }, totalDelay);
     });
 
-    setTimeout(() => {
-      if (!mounted) return;
+    timers.push(setTimeout(() => {
       setIsBooting(false);
-    }, totalDelay + 300);
+    }, totalDelay + 300));
 
     return () => {
-      mounted = false;
+      timers.forEach(clearTimeout);
     };
   }, []);
 
@@ -70,9 +75,10 @@ export default function RonConsole({ username = 'hacker', onClose }) {
 
   // Prevent body scroll when console is open
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = previousOverflow;
     };
   }, []);
 

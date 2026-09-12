@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '../supabase/server'
+import { getAuthData } from './getAuthData'
 
 /**
  * Server-side helper to require admin access.
@@ -9,18 +9,11 @@ import { createClient } from '../supabase/server'
  * @throws {Error} If not authenticated or not an admin
  */
 export async function requireAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { supabase, user, profile } = await getAuthData()
 
   if (!user) {
     throw new Error('Not authenticated')
   }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_admin')
-    .eq('id', user.id)
-    .single()
 
   if (!profile?.is_admin) {
     throw new Error('Not authorized')
@@ -36,18 +29,11 @@ export async function requireAdmin() {
  * @returns {Promise<{ supabase: SupabaseClient, user: User, profile: Profile }>}
  */
 export async function requireAdminPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { supabase, user, profile } = await getAuthData()
 
   if (!user) {
     redirect('/login')
   }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_admin, username, full_name')
-    .eq('id', user.id)
-    .single()
 
   if (!profile?.is_admin) {
     redirect('/')

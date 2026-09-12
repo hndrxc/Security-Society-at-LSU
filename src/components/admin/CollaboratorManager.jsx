@@ -72,7 +72,7 @@ export default function CollaboratorManager({ competitionId, collaborators, isOw
 
       {state?.message && (
         <p className={`mb-3 font-terminal text-xs ${
-          state.success ? 'text-[#39ff14]' : 'text-rose-400'
+          state.success ? 'text-[var(--cyber-green)]' : 'text-rose-400'
         }`}>
           {state.message}
         </p>

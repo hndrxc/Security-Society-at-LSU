@@ -1,77 +1,53 @@
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "../../utils/supabase/client";
 
-/**
- * Hook to get the current user and their profile data.
- * Extends useSupabaseUser pattern to also fetch profile.
- *
- * @returns {{ user: object|null, profile: object|null, loading: boolean }}
- */
 export function useSupabaseProfile() {
   const supabase = useMemo(() => createClient(), []);
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-
+  const [state, setState] = useState({
+    user: null,
+    profile: null,
+    loading: true,
+  });
   useEffect(() => {
-    let isMounted = true;
-
-    const loadUserAndProfile = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!isMounted) return;
-
-      const currentUser = data?.user ?? null;
-      setUser(currentUser);
-
-      if (currentUser) {
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("is_admin, username, full_name")
-          .eq("id", currentUser.id)
-          .single();
-
-        if (isMounted) {
-          setProfile(profileData);
-        }
-      } else {
-        setProfile(null);
+    let active = true;
+    let generation = 0;
+    const timers = new Set();
+    async function load() {
+      const current = ++generation;
+      try {
+        const { data } = await supabase.auth.getUser();
+        const user = data?.user ?? null;
+        const { data: profile } = user
+          ? await supabase
+              .from("profiles")
+              .select("is_admin, username, full_name")
+              .eq("id", user.id)
+              .single()
+          : { data: null };
+        if (active && current === generation)
+          setState({ user, profile, loading: false });
+      } catch {
+        if (active && current === generation)
+          setState({ user: null, profile: null, loading: false });
       }
-
-      if (isMounted) {
-        setLoading(false);
-      }
-    };
-
-    loadUserAndProfile();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-
-        if (currentUser) {
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("is_admin, username, full_name")
-            .eq("id", currentUser.id)
-            .single();
-
-          if (isMounted) {
-            setProfile(profileData);
-          }
-        } else {
-          setProfile(null);
-        }
-      }
-    );
-
+    }
+    // Auth callbacks run under the Supabase auth lock. Defer queries until it is released.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      const timer = setTimeout(() => {
+        timers.delete(timer);
+        if (active) void load();
+      }, 0);
+      timers.add(timer);
+    });
     return () => {
-      isMounted = false;
-      authListener?.subscription?.unsubscribe();
+      active = false;
+      generation++;
+      subscription.unsubscribe();
+      timers.forEach(clearTimeout);
     };
   }, [supabase]);
-
-  return { user, profile, loading };
+  return state;
 }

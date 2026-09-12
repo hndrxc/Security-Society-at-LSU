@@ -1,10 +1,10 @@
 .page {
-  --ink: #100b1c;
-  --paper: #f4f0e5;
-  --acid: #f4bd39;
-  --muted: #9aa59e;
-  --line: rgba(220, 229, 216, 0.18);
-  --danger: #ff604f;
+  --ink: var(--background);
+  --paper: var(--foreground);
+  --acid: var(--accent-amber);
+  --muted: #a5a5b6;
+  --line: #30313e;
+  --danger: var(--cyber-red);
   --font-phish-sans: var(--font-geist-sans);
   --font-phish-mono: var(--font-geist-mono);
   position: relative;

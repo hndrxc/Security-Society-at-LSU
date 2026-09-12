@@ -1,17 +1,10 @@
-import Link from "next/link";
-import Navbar from "@/components/Navbar";
+import PageShell from "@/components/layout/PageShell";
+import { ActionLink, PageHeading, Panel } from "@/components/ui/primitives";
+import Reveal from "@/components/ui/Reveal";
 import OfficerGrid from "@/components/about/OfficerGrid";
 import { getAuthData } from "../../../utils/auth/getAuthData";
 
-const officers = [ 
-  // {
-  //   name: "First Last",
-  //   role: "role",
-  //   team: "class",
-  //   photoPath: "cam.png",
-  //   description:
-  //     "Very long and drawn out description",
-  // },
+const officers = [
   {
     name: "Peyton 'Tai' Tran",
     role: "President",
@@ -28,7 +21,7 @@ const officers = [
     description:
       "Responsible for communication between LSU, board, and members. This includes maintenance of newsletter and calendar. True president.",
   },
-  
+
   {
     name: "Carter Hendricks",
     role: "Web-Master",
@@ -50,8 +43,7 @@ const officers = [
     role: "Treasurer",
     team: "Officer",
     photoPath: "benito.png",
-    description:
-      "Responsible for SSL funds and fundraising",
+    description: "Responsible for SSL funds and fundraising",
   },
   {
     name: "Taylor Graham",
@@ -85,14 +77,6 @@ const officers = [
     description:
       "Ambassador for the club, responsible for representing the club at events and promoting the club to potential members.",
   },
-  // {
-  //   name: "Aeris Kelleher",
-  //   role: "CTF Team/WiCyS President",
-  //   team: "CTF/Collaborator",
-  //   photoPath: "aeris.png",
-  //   description:
-  //     "Responsible for organizing Hello, Hacker! and helping to organize CTF meetings, future hackathons, and train for future CTF competitions",
-  // },
   {
     name: "Ronald Gibson, III",
     role: "Senior Advisor",
@@ -101,105 +85,56 @@ const officers = [
     description:
       "Secret leader of LSU's secret Cybersecurity cult and facilitator of communications between SSL and outside parties.",
   },
-  
 ];
 
 export default async function AboutPage() {
   const { user, profile } = await getAuthData();
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-[#0d0a14] to-black text-slate-100 cyber-grid">
-      {/* Animated blur orbs */}
-      <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-purple-700/40 blur-3xl" style={{ animation: 'slow-pulse 8s ease-in-out infinite' }} />
-      <div className="pointer-events-none absolute bottom-0 right-[-80px] h-72 w-72 rounded-full bg-amber-500/30 blur-3xl" style={{ animation: 'slow-pulse 10s ease-in-out infinite 1s' }} />
-
-      {/* Decorative corner brackets */}
-      <div className="pointer-events-none absolute left-6 top-6 h-8 w-8 border-l-2 border-t-2 border-purple-500/30" />
-      <div className="pointer-events-none absolute right-6 top-6 h-8 w-8 border-r-2 border-t-2 border-amber-500/30" />
-      <div className="pointer-events-none absolute bottom-6 left-6 h-8 w-8 border-b-2 border-l-2 border-purple-500/30" />
-      <div className="pointer-events-none absolute bottom-6 right-6 h-8 w-8 border-b-2 border-r-2 border-amber-500/30" />
-
-      <Navbar user={user} profile={profile} currentPath="/about" />
-
-      <main className="mx-auto w-full max-w-5xl px-4 pb-14 sm:px-6 sm:pb-16">
-        <section className="relative flex flex-col gap-8 clip-cyber-reverse border-l-4 border-l-amber-400 border border-purple-900/50 bg-[#0f0d16]/80 p-7 shadow-2xl shadow-purple-900/40 backdrop-blur sm:gap-10 sm:p-12 md:p-14">
-          {/* Scanline overlay */}
-          <div className="scanline-overlay pointer-events-none absolute inset-0 opacity-30" />
-
-          <div className="relative flex flex-col gap-5 text-center sm:max-w-3xl sm:gap-6 sm:text-left">
-            {/* Terminal intro */}
-            <div className="font-terminal text-xs text-[#39ff14]">
-              <span className="animate-pulse">[ACCESS GRANTED]</span>
-              <span className="ml-2 text-slate-400">Loading personnel database...</span>
-            </div>
-
-            <p className="font-terminal text-sm font-semibold uppercase tracking-[0.25em] text-amber-300">[ABOUT] Security Society at LSU</p>
-            <h1 className="rgb-hover text-3xl font-semibold leading-tight text-white sm:text-5xl">
-              We teach, compete, and secure together.
-            </h1>
-            <p className="text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-              The Security Society at LSU empowers students to build defensive and offensive skills through labs,
-              competitions, and mentorship. We welcome every background, from first-timers curious about cyber to
-              veterans looking to lead red and blue team operations.
+    <PageShell user={user} profile={profile} currentPath="/about">
+      <Reveal className="lab-about-hero">
+        <PageHeading
+          eyebrow="02 / The people behind SSL"
+          title="We teach, compete, and secure together."
+          description="The Security Society at LSU empowers students to build defensive and offensive skills through labs, competitions, and mentorship. We welcome every background, from first-timers curious about cyber to veterans looking to lead red and blue team operations."
+        />
+        <div className="lab-actions">
+          <ActionLink href="#officers">Meet the officers ↓</ActionLink>
+          <ActionLink href="/" variant="secondary">
+            Back to home
+          </ActionLink>
+        </div>
+      </Reveal>
+      <div className="lab-stat-grid">
+        {[
+          ["Founded", "2017"],
+          ["Focus", "Hands-on labs"],
+          ["Meetings", "Fridays"],
+        ].map(([label, value]) => (
+          <Panel key={label}>
+            <p className="lab-eyebrow">{label}</p>
+            <strong>{value}</strong>
+          </Panel>
+        ))}
+      </div>
+      <section id="officers">
+        <div className="lab-section-title">
+          <div>
+            <p className="lab-eyebrow">Personnel / {officers.length} members</p>
+            <h2>Meet the Officers</h2>
+            <p className="lab-muted text-sm mt-3">
+              A Quick Introduction to our Officers
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start sm:gap-4">
-              <a
-                className="pulse-glow rounded-full bg-amber-400 px-5 py-2.5 text-sm font-semibold text-black shadow-lg shadow-amber-500/30 transition-transform hover:-translate-y-0.5 hover:shadow-xl sm:px-6 sm:py-3"
-                href="#officers"
-              >
-                Meet the officers
-              </a>
-              <Link
-                href="/"
-                className="hover-glow rounded-full border border-purple-500/60 px-5 py-2.5 text-sm font-semibold text-purple-100 transition-colors hover:border-purple-400 hover:bg-purple-600 hover:text-white sm:px-6 sm:py-3"
-              >
-                Back to home
-              </Link>
-            </div>
           </div>
-
-          <div className="grid gap-4 text-center sm:grid-cols-3 sm:text-left">
-            <div className="hover-sweep clip-cyber border border-purple-900/50 bg-gradient-to-br from-[#181124] via-[#0f0b16] to-black px-5 py-4 shadow-lg shadow-purple-900/30">
-              <p className="font-terminal text-sm font-semibold uppercase tracking-wide text-amber-300/90">FOUNDED:</p>
-              <p className="text-glow-amber mt-2 text-3xl font-semibold text-white">2017</p>
-            </div>
-            <div className="hover-sweep clip-cyber border border-purple-900/50 bg-gradient-to-br from-[#181124] via-[#0f0b16] to-black px-5 py-4 shadow-lg shadow-purple-900/30">
-              <p className="font-terminal text-sm font-semibold uppercase tracking-wide text-amber-300/90">FOCUS:</p>
-              <p className="text-glow-amber mt-2 text-3xl font-semibold text-white">Hands-on labs</p>
-            </div>
-            <div className="hover-sweep clip-cyber border border-purple-900/50 bg-gradient-to-br from-[#181124] via-[#0f0b16] to-black px-5 py-4 shadow-lg shadow-purple-900/30">
-              <p className="font-terminal text-sm font-semibold uppercase tracking-wide text-amber-300/90">MEETINGS:</p>
-              <p className="text-glow-amber mt-2 text-3xl font-semibold text-white">Fridays</p>
-            </div>
-          </div>
-        </section>
-
-        <section id="officers" className="mt-12">
-          {/* Personnel section header */}
-          <div className="flex items-center gap-4 mb-6">
-            <span className="font-terminal text-xs uppercase tracking-wider text-amber-400">[PERSONNEL]</span>
-            <div className="h-px flex-1 bg-gradient-to-r from-purple-500/50 to-transparent" />
-            <span className="font-terminal text-xs text-slate-500">{officers.length} RECORDS</span>
-          </div>
-
-          <div className="flex flex-col gap-3 text-center sm:flex-row sm:items-end sm:justify-between sm:text-left">
-            <div>
-              <h2 className="rgb-hover text-3xl font-semibold text-white">Meet the Officers</h2>
-              <p className="text-sm text-slate-300">
-                A Quick Introduction to our Officers
-              </p>
-            </div>
-            <a
-              href="mailto:securitysocietylsu@protonmail.com"
-              className="hover-glow inline-flex items-center justify-center rounded-full border border-purple-500/60 px-5 py-2 text-sm font-semibold text-purple-100 transition-colors hover:border-purple-400 hover:bg-purple-600 hover:text-white"
-            >
-              Contact us
-            </a>
-          </div>
-
-          <OfficerGrid officers={officers} />
-        </section>
-      </main>
-    </div>
+          <ActionLink
+            href="mailto:securitysocietylsu@protonmail.com"
+            variant="secondary"
+          >
+            Contact us ↗
+          </ActionLink>
+        </div>
+        <OfficerGrid officers={officers} />
+      </section>
+    </PageShell>
   );
 }

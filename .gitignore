@@ -56,3 +56,6 @@ CLAUDE.md
 .claude
 READMEold.md
 /newthing
+supabase/migrations/011_link_events_to_ctf.sql
+/artifacts
+/tests

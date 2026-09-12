@@ -1,32 +1,9 @@
 // src/app/admin/ctf/submissions/page.jsx
-import { redirect } from "next/navigation";
-import { createClient } from "../../../../../utils/supabase/server";
-
-// Helper to verify admin authorization
-async function requireAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.is_admin) {
-    redirect("/");
-  }
-
-  return supabase;
-}
+import { requireAdminPage } from "../../../../../utils/auth/requireAdmin";
 
 export default async function SubmissionsPage({ searchParams }) {
   const params = await searchParams;
-  const supabase = await requireAdmin();
+  const { supabase } = await requireAdminPage();
 
   const filter = params.filter || 'all';
   const page = parseInt(params.page || '1', 10);
@@ -106,7 +83,7 @@ export default async function SubmissionsPage({ searchParams }) {
           href="/admin/ctf/submissions?filter=correct"
           className={`rounded px-3 py-1.5 font-terminal text-xs transition-colors ${
             filter === 'correct'
-              ? 'bg-[#39ff14]/20 text-[#39ff14]'
+              ? 'bg-[var(--cyber-green)]/20 text-[var(--cyber-green)]'
               : 'bg-slate-700/30 text-slate-400 hover:bg-slate-600/30'
           }`}
         >
@@ -148,7 +125,7 @@ export default async function SubmissionsPage({ searchParams }) {
                 <tr key={sub.id} className="hover:bg-purple-500/5">
                   <td className="px-4 py-3">
                     <span className={`font-terminal text-xs ${
-                      sub.is_correct ? 'text-[#39ff14]' : 'text-rose-400'
+                      sub.is_correct ? 'text-[var(--cyber-green)]' : 'text-rose-400'
                     }`}>
                       [{sub.is_correct ? 'CORRECT' : 'WRONG'}]
                     </span>

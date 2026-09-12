@@ -5,43 +5,43 @@ import { createClient } from "../../../utils/supabase/server";
 export default async function AdminDashboard() {
   const supabase = await createClient();
 
-  // Get competition stats
-  const { count: totalCompetitions } = await supabase
-    .from("ctf_competitions")
-    .select("*", { count: "exact", head: true });
-
-  const { count: activeCompetitions } = await supabase
-    .from("ctf_competitions")
-    .select("*", { count: "exact", head: true })
-    .eq("is_active", true);
-
-  // Get challenge count
-  const { count: totalChallenges } = await supabase
-    .from("ctf_challenges")
-    .select("*", { count: "exact", head: true });
-
-  // Get submission stats
-  const { count: totalSubmissions } = await supabase
-    .from("ctf_submissions")
-    .select("*", { count: "exact", head: true });
-
-  const { count: correctSubmissions } = await supabase
-    .from("ctf_submissions")
-    .select("*", { count: "exact", head: true })
-    .eq("is_correct", true);
-
-  // Get recent submissions
-  const { data: recentSubmissions } = await supabase
-    .from("ctf_submissions")
-    .select(`
+  const [
+    { count: totalCompetitions },
+    { count: activeCompetitions },
+    { count: totalChallenges },
+    { count: totalSubmissions },
+    { count: correctSubmissions },
+    { data: recentSubmissions },
+  ] = await Promise.all([
+    supabase
+      .from("ctf_competitions")
+      .select("*", { count: "exact", head: true }),
+    supabase
+      .from("ctf_competitions")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true),
+    supabase
+      .from("ctf_challenges")
+      .select("*", { count: "exact", head: true }),
+    supabase
+      .from("ctf_submissions")
+      .select("*", { count: "exact", head: true }),
+    supabase
+      .from("ctf_submissions")
+      .select("*", { count: "exact", head: true })
+      .eq("is_correct", true),
+    supabase
+      .from("ctf_submissions")
+      .select(`
       id,
       submitted_at,
       is_correct,
       challenge_id,
       ctf_challenges (title)
     `)
-    .order("submitted_at", { ascending: false })
-    .limit(5);
+      .order("submitted_at", { ascending: false })
+      .limit(5),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -58,7 +58,7 @@ export default async function AdminDashboard() {
         <div className="clip-cyber border border-purple-900/50 bg-black/60 p-4">
           <div className="font-terminal text-xs text-slate-500">COMPETITIONS</div>
           <div className="mt-2 text-3xl font-semibold text-white">{totalCompetitions || 0}</div>
-          <div className="mt-1 font-terminal text-xs text-[#39ff14]">
+          <div className="mt-1 font-terminal text-xs text-[var(--cyber-green)]">
             {activeCompetitions || 0} active
           </div>
         </div>
@@ -145,7 +145,7 @@ export default async function AdminDashboard() {
                 className="flex items-center justify-between rounded border border-purple-900/30 bg-black/40 px-4 py-2"
               >
                 <div className="flex items-center gap-3">
-                  <span className={`font-terminal text-xs ${sub.is_correct ? 'text-[#39ff14]' : 'text-rose-400'}`}>
+                  <span className={`font-terminal text-xs ${sub.is_correct ? 'text-[var(--cyber-green)]' : 'text-rose-400'}`}>
                     [{sub.is_correct ? 'CORRECT' : 'WRONG'}]
                   </span>
                   <span className="text-sm text-slate-300">

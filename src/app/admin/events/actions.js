@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '../../../../utils/supabase/server'
+import { requireAdmin } from '../../../../utils/auth/requireAdmin'
 import { getEventCompetitionValues } from '../../../../utils/events/ctf'
 
 const STORAGE_BUCKET = 'event-media'
@@ -92,28 +92,6 @@ function toISOWithTimezone(dateTimeLocal, timezone) {
   return utcDate.toISOString()
 }
 
-// Helper to check admin status
-async function requireAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new Error('Not authenticated')
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_admin')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile?.is_admin) {
-    throw new Error('Not authorized')
-  }
-
-  return { supabase, user }
-}
-
 // Upload image to storage
 async function uploadEventImage(supabase, eventId, file) {
   if (!file || !(file instanceof File) || file.size === 0) {
@@ -131,7 +109,6 @@ async function uploadEventImage(supabase, eventId, file) {
   }
 
   // Generate unique filename
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
   const timestamp = Date.now()
   const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').slice(0, 50)
   const storagePath = `${eventId}/${timestamp}-${safeName}`

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { useSupabaseProfile } from '@/hooks/useSupabaseProfile';
 
 // Dynamically import RonConsole to reduce initial bundle size
 const RonConsole = dynamic(() => import('./RonConsole'), {
@@ -12,50 +11,33 @@ const RonConsole = dynamic(() => import('./RonConsole'), {
 
 export default function RonProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [heldKeys, setHeldKeys] = useState(new Set());
-  const { user, profile } = useSupabaseProfile();
-
-  // Extract username from profile data, fallback to 'hacker'
-  const username = profile?.username
-    || user?.user_metadata?.username
-    || user?.user_metadata?.name
-    || user?.email?.split('@')[0]
-    || 'hacker';
-
   useEffect(() => {
+    // Held keys are transient input, not rendered state.
+    const heldKeys = new Set();
     const handleKeyDown = (e) => {
       // Don't trigger if user is typing in an input
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      if (e.target.matches?.('input, textarea, select') || e.target.isContentEditable) {
+        heldKeys.clear();
         return;
       }
 
       const key = e.key.toLowerCase();
 
-      setHeldKeys((prev) => {
-        const next = new Set(prev);
-        next.add(key);
-
-        // Check for R+O+N combination
-        if (next.has('r') && next.has('o') && next.has('n')) {
-          setIsOpen(true);
-        }
-
-        return next;
-      });
+      heldKeys.add(key);
+      if (heldKeys.has('r') && heldKeys.has('o') && heldKeys.has('n')) {
+        setIsOpen(true);
+        heldKeys.clear();
+      }
     };
 
     const handleKeyUp = (e) => {
       const key = e.key.toLowerCase();
-      setHeldKeys((prev) => {
-        const next = new Set(prev);
-        next.delete(key);
-        return next;
-      });
+      heldKeys.delete(key);
     };
 
     // Clear held keys when window loses focus
     const handleBlur = () => {
-      setHeldKeys(new Set());
+      heldKeys.clear();
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -74,7 +56,6 @@ export default function RonProvider({ children }) {
       {children}
       {isOpen && (
         <RonConsole
-          username={username}
           onClose={() => setIsOpen(false)}
         />
       )}
