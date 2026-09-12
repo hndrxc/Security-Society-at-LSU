@@ -59,7 +59,7 @@ export default async function CompetitionPage({ params }) {
 
   return <PageShell user={user} profile={profile} currentPath="/ctf" wide>
     <Breadcrumbs items={[{label:'Events',href:'/events#ctf'},{label:competition.title}]} />
-    <PageHeading eyebrow="CTF / Competition workspace" title={competition.title} description={competition.description}><Badge tone={isActive ? 'active' : hasEnded ? 'neutral' : 'gold'}>{isActive ? 'Active' : hasEnded ? 'Ended' : 'Upcoming'}</Badge></PageHeading>
+    <PageHeading eyebrow="CTF / Competition workspace" title={competition.title} transitionName={`competition-${competitionId}`} description={competition.description}><Badge tone={isActive ? 'active' : hasEnded ? 'neutral' : 'gold'}>{isActive ? 'Active' : hasEnded ? 'Ended' : 'Upcoming'}</Badge></PageHeading>
     <div className="lab-summary"><span><strong>{challenges?.length || 0}</strong> challenges</span><span><strong>{totalPoints}</strong> possible points</span><span>START: {startTime.toLocaleString()}</span><span>END: {endTime.toLocaleString()}</span></div>
     <div className="lab-workspace"><div className="min-w-0">
       {user ? <Panel className="mb-6"><div className="lab-card-top"><div><p className="lab-eyebrow">Your progress</p><p className="mt-2">{solvedChallenges.length}/{challenges?.length || 0} solved</p></div><strong className="text-amber-300 text-2xl">{userPoints} <span className="text-sm">pts</span></strong></div><progress className="mt-5 w-full h-1 accent-[var(--accent-purple)]" value={solvedChallenges.length} max={challenges?.length || 1} aria-label="Challenges solved" /></Panel> : <Feedback className="mb-6"><Link className="underline" href="/login">Log in</Link> to submit flags and track your progress.</Feedback>}

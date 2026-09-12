@@ -1,10 +1,11 @@
+import TransitionRegion from './TransitionRegion';
 import Link from 'next/link';
 
 export function Panel({ as: Tag = 'section', className = '', children, ...props }) {
   return <Tag className={`lab-panel ${className}`} {...props}>{children}</Tag>;
 }
-export function PageHeading({ eyebrow, title, description, children }) {
-  return <div className="lab-heading"><div><p className="lab-eyebrow">{eyebrow}</p><h1>{title}</h1>{description && <p className="lab-description">{description}</p>}</div>{children}</div>;
+export function PageHeading({ eyebrow, title, description, children, transitionName }) {
+  return <div className="lab-heading"><div><p className="lab-eyebrow">{eyebrow}</p>{transitionName ? <TransitionRegion name={transitionName} kind="lab-shared"><h1>{title}</h1></TransitionRegion> : <h1>{title}</h1>}{description && <p className="lab-description">{description}</p>}</div>{children}</div>;
 }
 export function Button({ variant = 'primary', className = '', ...props }) {
   return <button className={`lab-button lab-button--${variant} ${className}`} {...props} />;

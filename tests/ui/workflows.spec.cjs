@@ -155,3 +155,23 @@ test('reduced motion, skip link, and no hydration errors on public pages', async
   }
   expect(errors).toEqual([]);
 });
+test('preview transitions follow the flag and navigation works without browser support', async ({ page }) => {
+  const errors=[]; page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(()=>{
+    window.transitionCalls=0;
+    const original=document.startViewTransition?.bind(document);
+    if (original) document.startViewTransition=(...args)=>{window.transitionCalls++; return original(...args);};
+  });
+  await page.goto('/events');
+  await page.locator('.lab-competition-card').first().click();
+  await expect(page.getByRole('heading',{level:1})).toContainText('TigerSec');
+  await page.getByRole('link',{name:/View All/}).click();
+  await expect(page.getByRole('heading',{level:1})).toHaveText('Leaderboard');
+  const calls=await page.evaluate(()=>window.transitionCalls);
+  if (process.env.NEXT_PUBLIC_UI_TRANSITIONS === '1') expect(calls).toBeGreaterThan(0);
+  else expect(calls).toBe(0);
+  await page.addInitScript(()=>{document.startViewTransition=undefined;});
+  await page.goto('/events'); await page.locator('.lab-competition-card').first().click();
+  await expect(page.getByRole('heading',{level:1})).toContainText('TigerSec');
+  expect(errors).toEqual([]);
+});

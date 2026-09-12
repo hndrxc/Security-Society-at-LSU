@@ -2,6 +2,7 @@ const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.en
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
+  experimental: { viewTransition: process.env.NEXT_PUBLIC_UI_TRANSITIONS === "1" },
   async headers() {
     return [
       {
