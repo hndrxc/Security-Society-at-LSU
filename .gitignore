@@ -59,3 +59,8 @@ READMEold.md
 supabase/migrations/011_link_events_to_ctf.sql
 /artifacts
 /tests
+tests/
+tests/ui/start-app.cjs
+tests/ui/fixture-server.cjs
+tests/event-ctf.test.cjs
+SSL FALL 2026 GBM.pdf

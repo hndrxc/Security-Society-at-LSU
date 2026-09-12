@@ -4,6 +4,7 @@ import MobileNavigation from "./MobileNavigation";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/events", label: "Events", aliases: ["/ctf"] },
+  { href: "/kernels", label: "Kernels" },
   { href: "/about", label: "About" },
 ];
 export default function Navbar({ user, profile, currentPath = "/" }) {

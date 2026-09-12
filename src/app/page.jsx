@@ -1,26 +1,19 @@
 import PageShell from "@/components/layout/PageShell";
 import { ActionLink, Badge, Panel } from "@/components/ui/primitives";
 import Reveal from "@/components/ui/Reveal";
+import Link from "next/link";
+import { kernels } from "@/data/kernels";
 import { createClient } from "../../utils/supabase/server";
 import { getAuthData } from "../../utils/auth/getAuthData";
 import { getLiveCtfEvent } from "../../utils/events/ctf";
 
 export const revalidate = 60;
 const highlights = [
-  {
-    title: "Community-first Programs",
-    detail:
-      "Workshops, mentorship, and resources shaped with our partners and neighbors.",
-  },
-  {
-    title: "Capture the Flag Team",
-    detail: "We organize CTF events and challenges for our members.",
-  },
-  {
-    title: "Trusted Network",
-    detail:
-      "Local leaders, educators, and peers sharing their cybersecurity knowledge.",
-  },
+  ...kernels.map((kernel) => ({
+    title: kernel.name,
+    detail: kernel.summary,
+    href: `/kernels#${kernel.id}`,
+  })),
   {
     title: "Weekly Meetings",
     detail:
@@ -140,12 +133,17 @@ export default async function Home() {
         <section className="lab-programs" aria-label="Programs">
           {highlights.map((item, index) => (
             <Reveal interactive key={item.title} delay={index * 0.06}>
-              <Panel as="article" className="lab-program">
+              <Panel
+                as={item.href ? Link : "article"}
+                href={item.href}
+                className="lab-program"
+                aria-labelledby={`program-${index}`}
+              >
                 <p className="lab-eyebrow">
                   <span>0{index + 1}</span>
-                  <span aria-hidden="true">↗</span>
+                  {item.href && <span aria-hidden="true">↗</span>}
                 </p>
-                <h3>{item.title}</h3>
+                <h3 id={`program-${index}`}>{item.title}</h3>
                 <p>{item.detail}</p>
               </Panel>
             </Reveal>

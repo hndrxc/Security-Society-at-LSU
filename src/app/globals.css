@@ -574,6 +574,7 @@ h4 {
   gap: 16px;
 }
 .lab-program {
+  display: block;
   height: 100%;
   padding: 24px;
   transition:
