@@ -27,10 +27,11 @@ async function requireAdmin() {
 export default async function EventsPage() {
   const supabase = await requireAdmin();
 
-  const { data: events } = await supabase
-    .from("events")
-    .select("*")
-    .order("starts_at", { ascending: false });
+  const [{ data: events }, { data: competitions }] = await Promise.all([
+    supabase.from("events").select("*").order("starts_at", { ascending: false }),
+    supabase.from("ctf_competitions").select("id,title,is_active"),
+  ]);
+  const competitionsById = new Map((competitions || []).map((competition) => [competition.id, competition]));
 
   return (
     <div className="space-y-6">
@@ -70,7 +71,7 @@ export default async function EventsPage() {
             const end = new Date(event.ends_at || event.starts_at);
             const isUpcoming = now < start;
             const isActive = now >= start && now <= end;
-            const isEnded = now > end;
+            const competition = competitionsById.get(event.ctf_competition_id);
 
             return (
               <div
@@ -113,6 +114,15 @@ export default async function EventsPage() {
                         </span>
                       )}
                     </div>
+                    {event.ctf_competition_id && (
+                      <p className="mt-2 font-terminal text-xs text-purple-300">
+                        CTF:{" "}
+                        <Link href={`/admin/ctf/competitions/${event.ctf_competition_id}`} className="underline hover:text-amber-300">
+                          {competition?.title || 'Attached competition'}
+                        </Link>
+                        {competition && !competition.is_active && <span className="ml-2 text-slate-500">(hidden)</span>}
+                      </p>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Link

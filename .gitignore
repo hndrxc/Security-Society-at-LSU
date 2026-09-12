@@ -49,6 +49,7 @@ next-env.d.ts
 /supabase/migrations/*
 !/supabase/migrations/009_add_events_timezone.sql
 !/supabase/migrations/010_ensure_event_image_path.sql
+!/supabase/migrations/011_link_events_to_ctf.sql
 
 # Claude Code context
 CLAUDE.md

@@ -13,7 +13,7 @@ export const metadata = {
 
 const DEFAULT_TIME_ZONE = "America/Chicago";
 const EVENT_BASE_COLUMNS = ["id", "title", "description", "starts_at", "ends_at", "location"];
-const EVENT_OPTIONAL_COLUMNS = ["timezone", "image_path"];
+const EVENT_OPTIONAL_COLUMNS = ["timezone", "image_path", "ctf_competition_id"];
 
 function isMissingColumn(error, column) {
   return Boolean(
@@ -36,7 +36,7 @@ async function getVisibleEvents(supabase, now) {
   const availableOptionalColumns = new Set(EVENT_OPTIONAL_COLUMNS);
   let result;
 
-  // Migrations 009 and 010 add the optional display fields. Keep listings
+  // Migrations 009–011 add the optional display fields. Keep listings
   // available while an environment is upgraded instead of failing all events.
   for (let attempt = 0; attempt <= EVENT_OPTIONAL_COLUMNS.length; attempt += 1) {
     const columns = [...EVENT_BASE_COLUMNS, ...availableOptionalColumns].join(",");
@@ -99,6 +99,7 @@ export default async function EventsPage() {
   const { user, profile } = auth;
   const { data: events, error: eventsError } = eventsResult;
   const { data: competitions, error: competitionsError } = competitionsResult;
+  const competitionsById = new Map((competitions || []).map((competition) => [competition.id, competition]));
   const competitionIds = (competitions || []).map((competition) => competition.id);
 
   let challengeCounts = {};
@@ -240,6 +241,15 @@ export default async function EventsPage() {
                           </p>
                         )}
                         {event.description && <p className="text-sm leading-6 text-slate-300">{event.description}</p>}
+                        {competitionsById.has(event.ctf_competition_id) && (
+                          <Link
+                            href={`/ctf/${event.ctf_competition_id}`}
+                            className="mt-2 inline-flex items-center gap-2 self-start rounded border border-[#39ff14]/50 bg-[#39ff14]/10 px-4 py-2 font-terminal text-sm text-[#39ff14] hover:bg-[#39ff14]/20"
+                          >
+                            View CTF: {competitionsById.get(event.ctf_competition_id).title}
+                            <span aria-hidden="true">→</span>
+                          </Link>
+                        )}
                       </div>
                       <div className="flex shrink-0 flex-col items-start gap-1 whitespace-nowrap font-semibold text-slate-200 sm:items-end">
                         <div className="font-terminal text-xs">

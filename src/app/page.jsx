@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { createClient } from "../../utils/supabase/server";
+import { getLiveCtfEvent } from "../../utils/events/ctf";
 // import SnowfallEffect from "@/components/SnowfallEffect";
 
 export const revalidate = 60;
@@ -43,15 +44,7 @@ export default async function Home() {
     { data: activeEvent },
   ] = await Promise.all([
     supabase.auth.getUser(),
-    supabase
-      .from("events")
-      .select("id,title,location,ends_at")
-      .eq("is_visible", true)
-      .lte("starts_at", now)
-      .gte("ends_at", now)
-      .order("ends_at", { ascending: true })
-      .limit(1)
-      .maybeSingle(),
+    getLiveCtfEvent(supabase, now),
   ]);
 
   // Fetch user profile if logged in
@@ -119,7 +112,7 @@ export default async function Home() {
                   <div className="min-w-0">
                     <p className="font-terminal flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#39ff14] sm:justify-start">
                       <span className="h-2 w-2 animate-pulse rounded-full bg-[#39ff14]" aria-hidden="true" />
-                      [Live Event] CTF Access Online
+                      [Live Event] Event CTF
                     </p>
                     <h2 className="mt-1 truncate text-lg font-semibold text-white">{activeEvent.title}</h2>
                     {activeEvent.location && (
@@ -129,7 +122,7 @@ export default async function Home() {
                     )}
                   </div>
                   <Link
-                    href="/ctf"
+                    href={`/ctf/${activeEvent.ctf_competition_id}`}
                     className="pulse-glow inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#39ff14] px-5 py-2.5 text-sm font-bold text-black shadow-lg shadow-[#39ff14]/20 transition-transform hover:-translate-y-0.5 hover:text-black"
                   >
                     Open CTF

@@ -30,11 +30,10 @@ export default async function EditEventPage({ params }) {
   const { id } = await params;
   const supabase = await requireAdmin();
 
-  const { data: event, error } = await supabase
-    .from("events")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const [{ data: event, error }, { data: competitions, error: competitionsError }] = await Promise.all([
+    supabase.from("events").select("*").eq("id", id).single(),
+    supabase.from("ctf_competitions").select("id,title,is_active").order("starts_at", { ascending: false }),
+  ]);
 
   if (error || !event) {
     notFound();
@@ -58,7 +57,7 @@ export default async function EditEventPage({ params }) {
 
       {/* Form */}
       <div className="clip-cyber border border-purple-900/50 bg-black/60 p-6">
-        <EventForm event={event} />
+        <EventForm event={event} competitions={competitions || []} competitionsError={Boolean(competitionsError)} />
       </div>
 
       {/* Danger Zone */}

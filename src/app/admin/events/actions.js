@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '../../../../utils/supabase/server'
+import { getEventCompetitionValues } from '../../../../utils/events/ctf'
 
 const STORAGE_BUCKET = 'event-media'
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -205,6 +206,9 @@ export async function createEvent(prevState, formData) {
     const startsAt = toISOWithTimezone(startsAtLocal, timezone)
     const endsAt = toISOWithTimezone(endsAtLocal, timezone)
 
+    const competition = await getEventCompetitionValues(supabase, formData, startsAt, endsAt)
+    if (competition.error) return { success: false, message: competition.error }
+
     // Insert event first to get the ID
     const { data, error } = await insertEvent(supabase, {
       title,
@@ -214,6 +218,7 @@ export async function createEvent(prevState, formData) {
       location,
       timezone,
       is_visible: isVisible,
+      ...competition.values,
       created_by: user.id
     })
 
@@ -235,6 +240,7 @@ export async function createEvent(prevState, formData) {
         // Event created but image failed - return partial success
         revalidatePath('/admin/events')
         revalidatePath('/events')
+        revalidatePath('/')
         return {
           success: true,
           message: `Event created, but image upload failed: ${uploadError.message}`,
@@ -246,6 +252,7 @@ export async function createEvent(prevState, formData) {
     // Revalidate paths
     revalidatePath('/admin/events')
     revalidatePath('/events')
+    revalidatePath('/')
 
     return { success: true, message: 'Event created', id: data.id }
   } catch (error) {
@@ -278,6 +285,9 @@ export async function updateEvent(prevState, formData) {
     // Convert to UTC ISO strings
     const startsAt = toISOWithTimezone(startsAtLocal, timezone)
     const endsAt = toISOWithTimezone(endsAtLocal, timezone)
+
+    const competition = await getEventCompetitionValues(supabase, formData, startsAt, endsAt)
+    if (competition.error) return { success: false, message: competition.error }
 
     // Get current event to check for existing image
     const { data: existingEvent, error: existingEventError } = await supabase
@@ -329,6 +339,7 @@ export async function updateEvent(prevState, formData) {
       location,
       timezone,
       is_visible: isVisible,
+      ...competition.values,
       updated_at: new Date().toISOString()
     }
 
@@ -346,6 +357,7 @@ export async function updateEvent(prevState, formData) {
     revalidatePath('/admin/events')
     revalidatePath(`/admin/events/${id}`)
     revalidatePath('/events')
+    revalidatePath('/')
 
     return { success: true, message: 'Event updated' }
   } catch (error) {
@@ -383,6 +395,7 @@ export async function deleteEvent(id) {
     // Revalidate paths
     revalidatePath('/admin/events')
     revalidatePath('/events')
+    revalidatePath('/')
 
     return { success: true, message: 'Event deleted' }
   } catch (error) {

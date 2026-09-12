@@ -47,11 +47,12 @@ function getDefaultTimezone(eventTimezone) {
   return 'America/Chicago' // Default to Central Time
 }
 
-export default function EventForm({ event }) {
+export default function EventForm({ event, competitions = [], competitionsError = false }) {
   const router = useRouter()
   const isEditing = !!event
   const defaultTz = getDefaultTimezone(event?.timezone)
   const fileInputRef = useRef(null)
+  const [competitionId, setCompetitionId] = useState(event?.ctf_competition_id || '')
 
   // Image state
   const [imagePreview, setImagePreview] = useState(null)
@@ -205,6 +206,39 @@ export default function EventForm({ event }) {
         />
       </div>
 
+      <div>
+        <label htmlFor="ctf_competition_id" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+          CTF competition (optional)
+        </label>
+        <select
+          id="ctf_competition_id"
+          name="ctf_competition_id"
+          value={competitionId}
+          onChange={(e) => setCompetitionId(e.target.value)}
+          disabled={competitionsError}
+          aria-describedby="ctf-help"
+          className="w-full rounded-lg border border-purple-900/60 bg-black/60 px-4 py-3 text-white focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 disabled:opacity-50"
+        >
+          <option value="">No CTF attached</option>
+          {competitionId && !competitions.some((competition) => competition.id === competitionId) && (
+            <option value={competitionId}>Current CTF (unavailable)</option>
+          )}
+          {competitions.map((competition) => (
+            <option key={competition.id} value={competition.id}>
+              {competition.title}{competition.is_active ? '' : ' (hidden)'}
+            </option>
+          ))}
+        </select>
+        <p id="ctf-help" className="mt-2 text-sm text-slate-400">
+          {competitionsError
+            ? 'Unable to load competitions. Reload to change the CTF; saving other details keeps the current link.'
+            : 'A visible CTF appears on the event listing and in the homepage banner while this event is live. Set an end time for linked events. CTF submission times are managed separately.'}
+        </p>
+        {!competitionsError && competitions.length === 0 && (
+          <p className="mt-2 text-sm text-slate-400">Create a competition in the CTF admin console first.</p>
+        )}
+      </div>
+
       {/* Timezone */}
       <div>
         <label className="mb-2 block font-terminal text-xs uppercase text-slate-400">
@@ -244,6 +278,7 @@ export default function EventForm({ event }) {
           <input
             name="ends_at"
             type="datetime-local"
+            required={Boolean(competitionId)}
             defaultValue={formatDateForInput(event?.ends_at, defaultTz)}
             className="w-full rounded-lg border border-purple-900/60 bg-black/60 px-4 py-3 text-white focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
           />

@@ -1,7 +1,14 @@
 import Link from "next/link";
 import EventForm from "@/components/admin/EventForm";
+import { requireAdminPage } from "../../../../../utils/auth/requireAdmin";
 
-export default function NewEventPage() {
+export default async function NewEventPage() {
+  const { supabase } = await requireAdminPage();
+  const { data: competitions, error } = await supabase
+    .from("ctf_competitions")
+    .select("id,title,is_active")
+    .order("starts_at", { ascending: false });
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -20,7 +27,7 @@ export default function NewEventPage() {
 
       {/* Form */}
       <div className="clip-cyber border border-purple-900/50 bg-black/60 p-6">
-        <EventForm />
+        <EventForm competitions={competitions || []} competitionsError={Boolean(error)} />
       </div>
     </div>
   );

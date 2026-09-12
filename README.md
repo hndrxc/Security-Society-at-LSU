@@ -127,7 +127,7 @@ The migrations create seven application tables and extend an existing `profiles`
 | `ctf_solves` | Successful solves and awarded points |
 | `ctf_hint_unlocks` | Per-user hint unlocks and point deductions |
 | `ctf_competition_collaborators` | Editor/viewer access to competitions |
-| `events` | Club event schedules, visibility, and image paths |
+| `events` | Club event schedules, visibility, image paths, and optional CTF competition links |
 
 Key PostgreSQL functions include:
 
@@ -187,7 +187,7 @@ Restart the development server after changing any `NEXT_PUBLIC_*` value because 
 
 ### 3. Apply database migrations
 
-Apply the SQL files in `supabase/migrations/` in numerical order, from `001_ctf_system.sql` through `010_ensure_event_image_path.sql`.
+Apply the SQL files in `supabase/migrations/` in numerical order, from `001_ctf_system.sql` through `011_link_events_to_ctf.sql`.
 
 > [!CAUTION]
 > Migration 003 recreates the `events` table. Review and adapt it before applying the migration sequence to a database that already contains event data.
@@ -195,6 +195,14 @@ Apply the SQL files in `supabase/migrations/` in numerical order, from `001_ctf_
 Migration 009 adds the `events.timezone` column used by the event form and public event schedule. Existing events default to `America/Chicago`.
 
 Migration 010 idempotently ensures `events.image_path` exists in environments where migration 008 was not applied.
+
+Migration 011 adds nullable `events.ctf_competition_id`, referencing `ctf_competitions.id` with `ON DELETE SET NULL`. Apply it before attaching competitions in the admin console. Existing events stay unlinked, and deleting a competition keeps its events. Public event listings continue working before the migration is applied.
+
+In **Admin → Events → New/Edit**, select an optional CTF competition and provide an end time after the event starts. Hidden competitions can be attached in advance but their public links appear only after the competition is made visible. Choose **No CTF attached** to remove the link.
+
+The homepage promotes the visible, currently live event with a visible linked CTF that ends soonest. Its **Open CTF** button opens `/ctf/[competitionId]` directly. The events listing also shows each available linked CTF, including for upcoming events. The event schedule controls the homepage promotion; competition schedules still control submissions. Linking an event does not change competition permissions or submission times. The banner is evaluated when the homepage is rendered; an already-open page needs a refresh to reflect schedule changes.
+
+Run `npm test` for event/CTF regression checks and `npm run build` for the production build.
 
 Migration 008 adds the event image path but does not create the Storage bucket. In Supabase Storage, create a public `event-media` bucket with:
 

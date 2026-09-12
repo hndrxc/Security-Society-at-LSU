@@ -102,6 +102,11 @@ export async function createCompetition(prevState, formData) {
 
     revalidatePath('/admin/ctf/competitions')
     revalidatePath('/ctf')
+    revalidatePath('/events')
+    revalidatePath('/')
+    revalidatePath('/admin/events')
+    revalidatePath('/admin/events/new')
+    revalidatePath('/admin/events/[id]', 'page')
 
     return { success: true, message: 'Competition created', id: data.id }
   } catch (error) {
@@ -150,6 +155,11 @@ export async function updateCompetition(prevState, formData) {
 
     revalidatePath('/admin/ctf/competitions')
     revalidatePath('/ctf')
+    revalidatePath('/events')
+    revalidatePath('/')
+    revalidatePath('/admin/events')
+    revalidatePath('/admin/events/new')
+    revalidatePath('/admin/events/[id]', 'page')
 
     return { success: true, message: 'Competition updated' }
   } catch (error) {
@@ -178,6 +188,11 @@ export async function deleteCompetition(id) {
 
     revalidatePath('/admin/ctf/competitions')
     revalidatePath('/ctf')
+    revalidatePath('/events')
+    revalidatePath('/')
+    revalidatePath('/admin/events')
+    revalidatePath('/admin/events/new')
+    revalidatePath('/admin/events/[id]', 'page')
 
     return { success: true, message: 'Competition deleted' }
   } catch (error) {
