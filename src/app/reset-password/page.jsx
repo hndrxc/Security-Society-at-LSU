@@ -15,7 +15,14 @@ export default function ResetPasswordPage() {
 }
 
 function ResetPasswordFallback() {
-  return <AuthFrame title="Reset your password" description="Hold on while we prepare your reset link."><p role="status">Loading reset page…</p></AuthFrame>;
+  return (
+    <AuthFrame
+      title="Reset your password"
+      description="Hold on while we prepare your reset link."
+    >
+      <p role="status">Loading reset page…</p>
+    </AuthFrame>
+  );
 }
 
 function ResetPasswordContent() {
@@ -32,10 +39,12 @@ function ResetPasswordContent() {
     let ignore = false;
 
     // Listen for auth state changes (PASSWORD_RECOVERY event fires when user clicks reset link)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (ignore) return;
 
-      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
         if (session) {
           setSessionReady(true);
           setChecking(false);
@@ -46,7 +55,9 @@ function ResetPasswordContent() {
     // Also check if there's already a valid session (handles page refresh)
     const checkExistingSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (!ignore) {
           if (session) {
             setSessionReady(true);
@@ -74,13 +85,17 @@ function ResetPasswordContent() {
     if (!sessionReady) {
       setStatus({
         type: "error",
-        message: "This link is expired or invalid. Request a new reset email to continue.",
+        message:
+          "This link is expired or invalid. Request a new reset email to continue.",
       });
       return;
     }
 
     if (!password || password.length < 8) {
-      setStatus({ type: "error", message: "Password must be at least 8 characters." });
+      setStatus({
+        type: "error",
+        message: "Password must be at least 8 characters.",
+      });
       return;
     }
 
@@ -96,17 +111,24 @@ function ResetPasswordContent() {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        setStatus({ type: "error", message: "Could not update password. Please try again." });
+        setStatus({
+          type: "error",
+          message: "Could not update password. Please try again.",
+        });
       } else {
         setStatus({
           type: "success",
-          message: "Password updated. You can log in with your new password now.",
+          message:
+            "Password updated. You can log in with your new password now.",
         });
         setPassword("");
         setConfirmPassword("");
       }
     } catch {
-      setStatus({ type: "error", message: "Something went wrong. Please try again." });
+      setStatus({
+        type: "error",
+        message: "Something went wrong. Please try again.",
+      });
     } finally {
       setLoading(false);
     }
@@ -116,67 +138,77 @@ function ResetPasswordContent() {
   const labelClasses = "text-sm font-medium";
 
   return (
-    <AuthFrame title="Reset your password" description="Set a new password to get back into your account.">
-      <p className="lab-eyebrow">Account recovery</p><h2>Choose a new password.</h2>
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <label className={labelClasses} htmlFor="password">
-                New password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className={inputClasses}
-                placeholder="Choose something strong"
-                disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className={labelClasses} htmlFor="confirmPassword">
-                Confirm password
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                className={inputClasses}
-                placeholder="Re-enter your password"
-                disabled={loading}
-              />
-            </div>
+    <AuthFrame
+      title="Reset your password"
+      description="Set a new password to get back into your account."
+    >
+      <p className="lab-eyebrow">Account recovery</p>
+      <h2>Choose a new password.</h2>
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        <div className="space-y-2">
+          <label className={labelClasses} htmlFor="password">
+            New password
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className={inputClasses}
+            placeholder="Choose something strong"
+            disabled={loading}
+          />
+        </div>
+        <div className="space-y-2">
+          <label className={labelClasses} htmlFor="confirmPassword">
+            Confirm password
+          </label>
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            className={inputClasses}
+            placeholder="Re-enter your password"
+            disabled={loading}
+          />
+        </div>
 
-            {status?.message && (
-              <Feedback tone={status.type}>{status.message}</Feedback>
-            )}
-            {!status && !sessionReady && !checking && (
-              <p className="text-sm text-rose-300">
-                We could not confirm this reset request. Please send a new email and try again.
-              </p>
-            )}
+        {status?.message && (
+          <Feedback tone={status.type}>{status.message}</Feedback>
+        )}
+        {!status && !sessionReady && !checking && (
+          <p className="text-sm text-rose-300">
+            We could not confirm this reset request. Please send a new email and
+            try again.
+          </p>
+        )}
 
-            <div className="flex flex-col gap-3 pt-1">
-              <button
-                type="submit"
-                className="lab-button lab-button--primary w-full"
-                disabled={loading || checking || !sessionReady}
-              >
-                {checking ? "Checking session..." : loading ? "Updating..." : "Update password"}
-              </button>
-              <Link
-                href="/login"
-                className="lab-button lab-button--secondary w-full"
-              >
-                Back to login
-              </Link>
-            </div>
-          </form>
+        <div className="flex flex-col gap-3 pt-1">
+          <button
+            type="submit"
+            className="lab-button lab-button--primary w-full"
+            disabled={loading || checking || !sessionReady}
+          >
+            {checking
+              ? "Checking session..."
+              : loading
+                ? "Updating..."
+                : "Update password"}
+          </button>
+          <Link
+            href="/login"
+            prefetch={false}
+            className="lab-button lab-button--secondary w-full"
+          >
+            Back to login
+          </Link>
+        </div>
+      </form>
     </AuthFrame>
   );
 }

@@ -23,7 +23,21 @@ export default async function Account() {
     .eq("id", user.id)
     .single();
 
-  const isProfileIncomplete = !profile?.username?.trim() || !profile?.full_name?.trim();
+  const isProfileIncomplete =
+    !profile?.username?.trim() || !profile?.full_name?.trim();
 
-  return <PageShell user={user} profile={profile} currentPath="/account"><PageHeading eyebrow="Member / Profile" title="Manage your account details" description="Update your info and sign out securely." /><div className="max-w-2xl"><Panel><AccountForm user={user} isProfileIncomplete={isProfileIncomplete} /></Panel></div></PageShell>;
+  return (
+    <PageShell user={user} profile={profile} currentPath="/account">
+      <PageHeading
+        eyebrow="Member / Profile"
+        title="Manage your account details"
+        description="Update your info and sign out securely."
+      />
+      <div className="max-w-2xl">
+        <Panel>
+          <AccountForm user={user} isProfileIncomplete={isProfileIncomplete} />
+        </Panel>
+      </div>
+    </PageShell>
+  );
 }

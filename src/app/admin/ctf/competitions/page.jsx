@@ -94,7 +94,7 @@ export default async function CompetitionsPage() {
                       <h2 className="text-lg font-semibold text-white">{comp.title}</h2>
                       <span className={`rounded px-2 py-0.5 font-terminal text-xs ${
                         comp.is_active
-                          ? 'bg-[#39ff14]/20 text-[#39ff14]'
+                          ? 'bg-[var(--cyber-green)]/20 text-[var(--cyber-green)]'
                           : 'bg-slate-500/20 text-slate-400'
                       }`}>
                         {comp.is_active ? 'VISIBLE' : 'HIDDEN'}

@@ -1,5 +1,5 @@
-'use client'
-import './globals.css'
+"use client";
+import "./globals.css";
 
 export default function GlobalError({ error, reset }) {
   return (
@@ -12,8 +12,12 @@ export default function GlobalError({ error, reset }) {
             </div>
 
             <div className="mt-6 space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">[CRITICAL ERROR]</p>
-              <h1 className="text-3xl font-semibold text-white">Application Error</h1>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
+                [CRITICAL ERROR]
+              </p>
+              <h1 className="text-3xl font-semibold text-white">
+                Application Error
+              </h1>
               <p className="text-base leading-7 text-slate-300">
                 A critical error occurred. Please try again.
               </p>
@@ -31,5 +35,5 @@ export default function GlobalError({ error, reset }) {
         </div>
       </body>
     </html>
-  )
+  );
 }

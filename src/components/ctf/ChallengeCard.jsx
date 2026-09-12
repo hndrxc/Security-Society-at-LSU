@@ -1,27 +1,27 @@
-'use client'
+"use client";
 
-import { Activity, useState, useId } from 'react'
-import { Badge, Feedback } from '@/components/ui/primitives'
-import FlagSubmitForm from './FlagSubmitForm'
-import HintButton from './HintButton'
+import { Activity, useState, useId } from "react";
+import { Badge, Feedback } from "@/components/ui/primitives";
+import FlagSubmitForm from "./FlagSubmitForm";
+import HintButton from "./HintButton";
 
 const difficultyColors = {
-  easy: 'bg-green-500/20 text-green-400 border-green-500/30',
-  medium: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-  hard: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-  insane: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-}
+  easy: "bg-green-500/20 text-green-400 border-green-500/30",
+  medium: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  hard: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+  insane: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+};
 
 const categoryIcons = {
-  web: '[WEB]',
-  crypto: '[CRYPTO]',
-  forensics: '[FORENSICS]',
-  pwn: '[PWN]',
-  reversing: '[REV]',
-  misc: '[MISC]',
-  osint: '[OSINT]',
-  steganography: '[STEGO]'
-}
+  web: "[WEB]",
+  crypto: "[CRYPTO]",
+  forensics: "[FORENSICS]",
+  pwn: "[PWN]",
+  reversing: "[REV]",
+  misc: "[MISC]",
+  osint: "[OSINT]",
+  steganography: "[STEGO]",
+};
 
 export default function ChallengeCard({
   challenge,
@@ -30,28 +30,36 @@ export default function ChallengeCard({
   unlockedHints,
   isLoggedIn,
   competitionActive,
-  onSolve
+  onSolve,
 }) {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const contentId = useId()
-  const [confirmedResult, setConfirmedResult] = useState(null)
-  const [addedHints, setAddedHints] = useState([])
-  const localSolved = isSolved || Boolean(confirmedResult)
-  const localHints = [...(unlockedHints || []), ...addedHints]
-  const handleSolveSuccess = (result) => { setConfirmedResult(result); onSolve?.(result) }
-  const handleHintUnlock = (hintNumber) => { setAddedHints(prev => [...prev, { hint_number: hintNumber }]) }
+  const [isExpanded, setIsExpanded] = useState(false);
+  const contentId = useId();
+  const [confirmedResult, setConfirmedResult] = useState(null);
+  const [addedHints, setAddedHints] = useState([]);
+  const localSolved = isSolved || Boolean(confirmedResult);
+  const localHints = [...(unlockedHints || []), ...addedHints];
+  const handleSolveSuccess = (result) => {
+    setConfirmedResult(result);
+    onSolve?.(result);
+  };
+  const handleHintUnlock = (hintNumber) => {
+    setAddedHints((prev) => [...prev, { hint_number: hintNumber }]);
+  };
 
-  const difficultyClass = difficultyColors[challenge.difficulty] || difficultyColors.medium
-  const categoryIcon = categoryIcons[challenge.category?.toLowerCase()] || `[${challenge.category?.toUpperCase()}]`
+  const difficultyClass =
+    difficultyColors[challenge.difficulty] || difficultyColors.medium;
+  const categoryIcon =
+    categoryIcons[challenge.category?.toLowerCase()] ||
+    `[${challenge.category?.toUpperCase()}]`;
 
   const hints = [
     { number: 1, text: challenge.hint_1, cost: challenge.hint_1_cost },
     { number: 2, text: challenge.hint_2, cost: challenge.hint_2_cost },
-    { number: 3, text: challenge.hint_3, cost: challenge.hint_3_cost }
-  ].filter(h => h.text)
+    { number: 3, text: challenge.hint_3, cost: challenge.hint_3_cost },
+  ].filter((h) => h.text);
 
   const isHintUnlocked = (hintNumber) =>
-    localHints.some(h => h.hint_number === hintNumber)
+    localHints.some((h) => h.hint_number === hintNumber);
 
   return (
     <div className="lab-challenge" data-solved={localSolved}>
@@ -64,16 +72,20 @@ export default function ChallengeCard({
       >
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-terminal text-xs text-purple-400">{categoryIcon}</span>
-            <h3 className={`font-semibold ${localSolved ? 'text-[#39ff14]' : 'text-white'}`}>
+            <span className="font-terminal text-xs text-purple-400">
+              {categoryIcon}
+            </span>
+            <h3
+              className={`font-semibold ${localSolved ? "text-[var(--cyber-green)]" : "text-white"}`}
+            >
               {challenge.title}
             </h3>
-            {localSolved && (
-              <Badge tone="active">Solved</Badge>
-            )}
+            {localSolved && <Badge tone="active">Solved</Badge>}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`rounded border px-2 py-0.5 font-terminal text-xs ${difficultyClass}`}>
+            <span
+              className={`rounded border px-2 py-0.5 font-terminal text-xs ${difficultyClass}`}
+            >
               {challenge.difficulty?.toUpperCase()}
             </span>
             <span className="font-terminal text-xs text-amber-300">
@@ -83,13 +95,13 @@ export default function ChallengeCard({
         </div>
         <div className="flex items-center gap-2">
           <span className="font-terminal text-xs text-slate-500">
-            {isExpanded ? '[-]' : '[+]'}
+            {isExpanded ? "[-]" : "[+]"}
           </span>
         </div>
       </button>
 
       {/* Expanded content */}
-      <Activity mode={isExpanded ? 'visible' : 'hidden'}>
+      <Activity mode={isExpanded ? "visible" : "hidden"}>
         <div id={contentId} className="lab-challenge-content">
           <div className="mt-4 space-y-4">
             {/* Description */}
@@ -102,7 +114,8 @@ export default function ChallengeCard({
             {/* Flag format hint */}
             {challenge.flag_format && (
               <div className="font-terminal text-xs text-slate-500">
-                FLAG FORMAT: <span className="text-purple-400">{challenge.flag_format}</span>
+                FLAG FORMAT:{" "}
+                <span className="text-purple-400">{challenge.flag_format}</span>
               </div>
             )}
 
@@ -137,7 +150,9 @@ export default function ChallengeCard({
             {/* Hints section */}
             {hints.length > 0 && !localSolved && (
               <div className="space-y-2">
-                <div className="font-terminal text-xs text-slate-500">HINTS:</div>
+                <div className="font-terminal text-xs text-slate-500">
+                  HINTS:
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {hints.map((hint) => (
                     <HintButton
@@ -154,11 +169,18 @@ export default function ChallengeCard({
               </div>
             )}
 
-            {confirmedResult && <Feedback tone="success">{confirmedResult.message}{confirmedResult.pointsAwarded > 0 && ` +${confirmedResult.pointsAwarded} pts`}{confirmedResult.firstBlood && ' · FIRST BLOOD!'}</Feedback>}
+            {confirmedResult && (
+              <Feedback tone="success">
+                {confirmedResult.message}
+                {confirmedResult.pointsAwarded > 0 &&
+                  ` +${confirmedResult.pointsAwarded} pts`}
+                {confirmedResult.firstBlood && " · FIRST BLOOD!"}
+              </Feedback>
+            )}
             {/* Solve info */}
             {localSolved && solveInfo && (
-              <div className="font-terminal rounded border border-[#39ff14]/30 bg-[#39ff14]/5 p-3 text-xs">
-                <div className="text-[#39ff14]">
+              <div className="font-terminal rounded border border-[var(--cyber-green)]/30 bg-[var(--cyber-green)]/5 p-3 text-xs">
+                <div className="text-[var(--cyber-green)]">
                   SOLVED: {new Date(solveInfo.solved_at).toLocaleString()}
                 </div>
                 <div className="text-amber-300">
@@ -192,5 +214,5 @@ export default function ChallengeCard({
         </div>
       </Activity>
     </div>
-  )
+  );
 }

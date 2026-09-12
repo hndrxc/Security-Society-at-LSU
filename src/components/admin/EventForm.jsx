@@ -1,118 +1,127 @@
-'use client'
+"use client";
 
-import { useActionState, useState, useRef } from 'react'
-import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import { createEvent, updateEvent } from '@/app/admin/events/actions'
+import { useActionState, useState, useRef } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { createEvent, updateEvent } from "@/app/admin/events/actions";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 // Common US timezones
 const TIMEZONES = [
-  { value: 'America/Chicago', label: 'Central Time (CT)' },
-  { value: 'America/New_York', label: 'Eastern Time (ET)' },
-  { value: 'America/Denver', label: 'Mountain Time (MT)' },
-  { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
-  { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
-  { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' },
-  { value: 'UTC', label: 'UTC' },
-]
+  { value: "America/Chicago", label: "Central Time (CT)" },
+  { value: "America/New_York", label: "Eastern Time (ET)" },
+  { value: "America/Denver", label: "Mountain Time (MT)" },
+  { value: "America/Los_Angeles", label: "Pacific Time (PT)" },
+  { value: "America/Anchorage", label: "Alaska Time (AKT)" },
+  { value: "Pacific/Honolulu", label: "Hawaii Time (HT)" },
+  { value: "UTC", label: "UTC" },
+];
 
 function formatDateForInput(dateString, timezone) {
-  if (!dateString) return ''
-  const date = new Date(dateString)
+  if (!dateString) return "";
+  const date = new Date(dateString);
   // Format date in the specified timezone for the datetime-local input
   const options = {
     timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
     hour12: false,
-  }
-  const parts = new Intl.DateTimeFormat('en-CA', options).formatToParts(date)
-  const get = (type) => parts.find((p) => p.type === type)?.value || ''
-  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`
+  };
+  const parts = new Intl.DateTimeFormat("en-CA", options).formatToParts(date);
+  const get = (type) => parts.find((p) => p.type === type)?.value || "";
+  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
 }
 
 // Detect user's timezone or default to Central
 function getDefaultTimezone(eventTimezone) {
-  if (eventTimezone) return eventTimezone
-  const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone
+  if (eventTimezone) return eventTimezone;
+  const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   // Check if user's timezone is in our list
   if (TIMEZONES.some((tz) => tz.value === userTz)) {
-    return userTz
+    return userTz;
   }
-  return 'America/Chicago' // Default to Central Time
+  return "America/Chicago"; // Default to Central Time
 }
 
-export default function EventForm({ event, competitions = [], competitionsError = false }) {
-  const router = useRouter()
-  const isEditing = !!event
-  const defaultTz = getDefaultTimezone(event?.timezone)
-  const fileInputRef = useRef(null)
-  const [competitionId, setCompetitionId] = useState(event?.ctf_competition_id || '')
+export default function EventForm({
+  event,
+  competitions = [],
+  competitionsError = false,
+}) {
+  const router = useRouter();
+  const isEditing = !!event;
+  const defaultTz = getDefaultTimezone(event?.timezone);
+  const fileInputRef = useRef(null);
+  const [competitionId, setCompetitionId] = useState(
+    event?.ctf_competition_id || "",
+  );
 
   // Image state
-  const [imagePreview, setImagePreview] = useState(null)
-  const [imageError, setImageError] = useState(null)
-  const [removeImage, setRemoveImage] = useState(false)
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageError, setImageError] = useState(null);
+  const [removeImage, setRemoveImage] = useState(false);
 
   // Build existing image URL if event has one
   const existingImageUrl = event?.image_path
     ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-media/${event.image_path}`
-    : null
+    : null;
 
   const handleFileChange = (e) => {
-    const file = e.target.files?.[0]
-    setImageError(null)
-    setRemoveImage(false)
+    const file = e.target.files?.[0];
+    setImageError(null);
+    setRemoveImage(false);
 
     if (!file) {
-      setImagePreview(null)
-      return
+      setImagePreview(null);
+      return;
     }
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setImageError('Please select a valid image (JPEG, PNG, WebP, or GIF)')
-      e.target.value = ''
-      return
+      setImageError("Please select a valid image (JPEG, PNG, WebP, or GIF)");
+      e.target.value = "";
+      return;
     }
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      setImageError('Image must be less than 5MB')
-      e.target.value = ''
-      return
+      setImageError("Image must be less than 5MB");
+      e.target.value = "";
+      return;
     }
 
     // Create preview
-    const reader = new FileReader()
-    reader.onloadend = () => setImagePreview(reader.result)
-    reader.readAsDataURL(file)
-  }
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result);
+    reader.readAsDataURL(file);
+  };
 
   const handleRemoveImage = () => {
-    setImagePreview(null)
-    setRemoveImage(true)
+    setImagePreview(null);
+    setRemoveImage(true);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      fileInputRef.current.value = "";
     }
-  }
+  };
 
-  const [state, formAction, pending] = useActionState(async (prevState, formData) => {
-    const action = isEditing ? updateEvent : createEvent
-    const result = await action(prevState, formData)
+  const [state, formAction, pending] = useActionState(
+    async (prevState, formData) => {
+      const action = isEditing ? updateEvent : createEvent;
+      const result = await action(prevState, formData);
 
-    if (result.success && !isEditing) {
-      router.push('/admin/events')
-    }
+      if (result.success && !isEditing) {
+        router.push("/admin/events");
+      }
 
-    return result
-  }, null)
+      return result;
+    },
+    null,
+  );
 
   return (
     <form action={formAction} className="space-y-6">
@@ -120,15 +129,19 @@ export default function EventForm({ event, competitions = [], competitionsError 
 
       {/* Title */}
       <div>
-        <label htmlFor="event-title" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+        <label
+          htmlFor="event-title"
+          className="mb-2 block font-terminal text-xs uppercase text-slate-400"
+        >
           Title *
         </label>
         <input
-          id="event-title" name="title"
+          id="event-title"
+          name="title"
           type="text"
           required
           maxLength={200}
-          defaultValue={event?.title || ''}
+          defaultValue={event?.title || ""}
           placeholder="Weekly Meetup"
           className="w-full rounded-lg border border-purple-900/60 bg-black/60 px-4 py-3 text-white placeholder-slate-500 focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
         />
@@ -136,13 +149,17 @@ export default function EventForm({ event, competitions = [], competitionsError 
 
       {/* Description */}
       <div>
-        <label htmlFor="event-description" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+        <label
+          htmlFor="event-description"
+          className="mb-2 block font-terminal text-xs uppercase text-slate-400"
+        >
           Description
         </label>
         <textarea
-          id="event-description" name="description"
+          id="event-description"
+          name="description"
           rows={3}
-          defaultValue={event?.description || ''}
+          defaultValue={event?.description || ""}
           placeholder="Event details and what to expect..."
           className="w-full rounded-lg border border-purple-900/60 bg-black/60 px-4 py-3 text-white placeholder-slate-500 focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
         />
@@ -150,14 +167,20 @@ export default function EventForm({ event, competitions = [], competitionsError 
 
       {/* Event Image */}
       <div>
-        <label htmlFor="event-image" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+        <label
+          htmlFor="event-image"
+          className="mb-2 block font-terminal text-xs uppercase text-slate-400"
+        >
           Event Image
         </label>
 
         {/* Image Preview */}
         {(imagePreview || (existingImageUrl && !removeImage)) && (
           <div className="relative mb-3 overflow-hidden rounded-lg border border-purple-900/60">
-            <Image width={1200} height={400} unoptimized
+            <Image
+              width={1200}
+              height={400}
+              unoptimized
               src={imagePreview || existingImageUrl}
               alt="Event preview"
               className="h-48 w-full object-cover"
@@ -184,10 +207,14 @@ export default function EventForm({ event, competitions = [], competitionsError 
         />
 
         {/* Hidden field to signal image removal */}
-        {removeImage && <input type="hidden" name="remove_image" value="true" />}
+        {removeImage && (
+          <input type="hidden" name="remove_image" value="true" />
+        )}
 
         {imageError && (
-          <p className="mt-2 font-terminal text-xs text-rose-400">{imageError}</p>
+          <p className="mt-2 font-terminal text-xs text-rose-400">
+            {imageError}
+          </p>
         )}
         <p className="mt-2 font-terminal text-xs text-slate-500">
           JPEG, PNG, WebP, or GIF. Max 5MB. Displays as banner on event page.
@@ -196,20 +223,27 @@ export default function EventForm({ event, competitions = [], competitionsError 
 
       {/* Location */}
       <div>
-        <label htmlFor="event-location" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+        <label
+          htmlFor="event-location"
+          className="mb-2 block font-terminal text-xs uppercase text-slate-400"
+        >
           Location
         </label>
         <input
-          id="event-location" name="location"
+          id="event-location"
+          name="location"
           type="text"
-          defaultValue={event?.location || ''}
+          defaultValue={event?.location || ""}
           placeholder="PFT 1200 or Virtual (Discord)"
           className="w-full rounded-lg border border-purple-900/60 bg-black/60 px-4 py-3 text-white placeholder-slate-500 focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
         />
       </div>
 
       <div>
-        <label htmlFor="ctf_competition_id" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+        <label
+          htmlFor="ctf_competition_id"
+          className="mb-2 block font-terminal text-xs uppercase text-slate-400"
+        >
           CTF competition (optional)
         </label>
         <select
@@ -222,32 +256,42 @@ export default function EventForm({ event, competitions = [], competitionsError 
           className="w-full rounded-lg border border-purple-900/60 bg-black/60 px-4 py-3 text-white focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 disabled:opacity-50"
         >
           <option value="">No CTF attached</option>
-          {competitionId && !competitions.some((competition) => competition.id === competitionId) && (
-            <option value={competitionId}>Current CTF (unavailable)</option>
-          )}
+          {competitionId &&
+            !competitions.some(
+              (competition) => competition.id === competitionId,
+            ) && (
+              <option value={competitionId}>Current CTF (unavailable)</option>
+            )}
           {competitions.map((competition) => (
             <option key={competition.id} value={competition.id}>
-              {competition.title}{competition.is_active ? '' : ' (hidden)'}
+              {competition.title}
+              {competition.is_active ? "" : " (hidden)"}
             </option>
           ))}
         </select>
         <p id="ctf-help" className="mt-2 text-sm text-slate-400">
           {competitionsError
-            ? 'Unable to load competitions. Reload to change the CTF; saving other details keeps the current link.'
-            : 'A visible CTF appears on the event listing and in the homepage banner while this event is live. Set an end time for linked events. CTF submission times are managed separately.'}
+            ? "Unable to load competitions. Reload to change the CTF; saving other details keeps the current link."
+            : "A visible CTF appears on the event listing and in the homepage banner while this event is live. Set an end time for linked events. CTF submission times are managed separately."}
         </p>
         {!competitionsError && competitions.length === 0 && (
-          <p className="mt-2 text-sm text-slate-400">Create a competition in the CTF admin console first.</p>
+          <p className="mt-2 text-sm text-slate-400">
+            Create a competition in the CTF admin console first.
+          </p>
         )}
       </div>
 
       {/* Timezone */}
       <div>
-        <label htmlFor="event-timezone" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+        <label
+          htmlFor="event-timezone"
+          className="mb-2 block font-terminal text-xs uppercase text-slate-400"
+        >
           Timezone
         </label>
         <select
-          id="event-timezone" name="timezone"
+          id="event-timezone"
+          name="timezone"
           defaultValue={defaultTz}
           className="w-full rounded-lg border border-purple-900/60 bg-black/60 px-4 py-3 text-white focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
         >
@@ -262,11 +306,15 @@ export default function EventForm({ event, competitions = [], competitionsError 
       {/* Start and End Dates */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="event-starts_at" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+          <label
+            htmlFor="event-starts_at"
+            className="mb-2 block font-terminal text-xs uppercase text-slate-400"
+          >
             Start Date/Time *
           </label>
           <input
-            id="event-starts_at" name="starts_at"
+            id="event-starts_at"
+            name="starts_at"
             type="datetime-local"
             required
             defaultValue={formatDateForInput(event?.starts_at, defaultTz)}
@@ -274,11 +322,15 @@ export default function EventForm({ event, competitions = [], competitionsError 
           />
         </div>
         <div>
-          <label htmlFor="event-ends_at" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+          <label
+            htmlFor="event-ends_at"
+            className="mb-2 block font-terminal text-xs uppercase text-slate-400"
+          >
             End Date/Time
           </label>
           <input
-            id="event-ends_at" name="ends_at"
+            id="event-ends_at"
+            name="ends_at"
             type="datetime-local"
             required={Boolean(competitionId)}
             defaultValue={formatDateForInput(event?.ends_at, defaultTz)}
@@ -297,7 +349,10 @@ export default function EventForm({ event, competitions = [], competitionsError 
           value="true"
           className="h-4 w-4 cursor-pointer rounded border-purple-900/60 bg-black/60 text-amber-400 focus:ring-1 focus:ring-amber-400/30"
         />
-        <label htmlFor="is_visible" className="font-terminal text-sm uppercase text-slate-400">
+        <label
+          htmlFor="is_visible"
+          className="font-terminal text-sm uppercase text-slate-400"
+        >
           Make event visible to users
         </label>
       </div>
@@ -309,17 +364,19 @@ export default function EventForm({ event, competitions = [], competitionsError 
           disabled={pending}
           className="rounded-lg bg-amber-400 px-6 py-3 font-semibold text-black shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-0.5 hover:bg-amber-300 disabled:opacity-50 disabled:hover:translate-y-0"
         >
-          {pending ? 'Saving...' : isEditing ? 'Update Event' : 'Create Event'}
+          {pending ? "Saving..." : isEditing ? "Update Event" : "Create Event"}
         </button>
 
         {state?.message && (
-          <span className={`font-terminal text-sm ${
-            state.success ? 'text-[#39ff14]' : 'text-rose-400'
-          }`}>
+          <span
+            className={`font-terminal text-sm ${
+              state.success ? "text-[var(--cyber-green)]" : "text-rose-400"
+            }`}
+          >
             {state.message}
           </span>
         )}
       </div>
     </form>
-  )
+  );
 }

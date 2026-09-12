@@ -2,7 +2,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageShell from "@/components/layout/PageShell";
-import { ActionLink, Badge, Breadcrumbs, Feedback, PageHeading, Panel } from "@/components/ui/primitives";
+import {
+  ActionLink,
+  Badge,
+  Breadcrumbs,
+  Feedback,
+  PageHeading,
+  Panel,
+} from "@/components/ui/primitives";
 import ChallengeBrowser from "@/components/ctf/ChallengeBrowser";
 import LeaderboardTable from "@/components/ctf/LeaderboardTable";
 import { createClient } from "../../../../utils/supabase/server";
@@ -38,13 +45,17 @@ export default async function CompetitionPage({ params }) {
     .order("points", { ascending: true });
 
   // Fetch leaderboard
-  const { data: leaderboard } = await supabase.rpc("get_competition_leaderboard", {
-    p_competition_id: competitionId,
-    p_limit: 10,
-  });
+  const { data: leaderboard } = await supabase.rpc(
+    "get_competition_leaderboard",
+    {
+      p_competition_id: competitionId,
+      p_limit: 10,
+    },
+  );
 
   // Get user's solve status
-  const { solvedChallenges, unlockedHints } = await getUserChallengeStatus(competitionId);
+  const { solvedChallenges, unlockedHints } =
+    await getUserChallengeStatus(competitionId);
 
   // Competition status
   const now = new Date();
@@ -55,16 +66,118 @@ export default async function CompetitionPage({ params }) {
   const hasEnded = now > endTime;
 
   const totalPoints = challenges?.reduce((sum, ch) => sum + ch.points, 0) || 0;
-  const userPoints = solvedChallenges.reduce((sum, s) => sum + s.points_awarded, 0);
+  const userPoints = solvedChallenges.reduce(
+    (sum, s) => sum + s.points_awarded,
+    0,
+  );
 
-  return <PageShell user={user} profile={profile} currentPath="/ctf" wide>
-    <Breadcrumbs items={[{label:'Events',href:'/events#ctf'},{label:competition.title}]} />
-    <PageHeading eyebrow="CTF / Competition workspace" title={competition.title} transitionName={`competition-${competitionId}`} description={competition.description}><Badge tone={isActive ? 'active' : hasEnded ? 'neutral' : 'gold'}>{isActive ? 'Active' : hasEnded ? 'Ended' : 'Upcoming'}</Badge></PageHeading>
-    <div className="lab-summary"><span><strong>{challenges?.length || 0}</strong> challenges</span><span><strong>{totalPoints}</strong> possible points</span><span>START: {startTime.toLocaleString()}</span><span>END: {endTime.toLocaleString()}</span></div>
-    <div className="lab-workspace"><div className="min-w-0">
-      {user ? <Panel className="mb-6"><div className="lab-card-top"><div><p className="lab-eyebrow">Your progress</p><p className="mt-2">{solvedChallenges.length}/{challenges?.length || 0} solved</p></div><strong className="text-amber-300 text-2xl">{userPoints} <span className="text-sm">pts</span></strong></div><progress className="mt-5 w-full h-1 accent-[var(--accent-purple)]" value={solvedChallenges.length} max={challenges?.length || 1} aria-label="Challenges solved" /></Panel> : <Feedback className="mb-6"><Link className="underline" href="/login">Log in</Link> to submit flags and track your progress.</Feedback>}
-      {competition.rules && <Panel className="mb-6"><p className="lab-eyebrow mb-3">Rules</p><p className="whitespace-pre-wrap lab-muted text-sm">{competition.rules}</p></Panel>}
-      {!hasStarted ? <Panel><Badge tone="gold">Locked</Badge><p className="mt-4">Competition starts: {startTime.toLocaleString()}</p></Panel> : !challenges?.length ? <Panel><p className="lab-muted">No challenges available yet.</p></Panel> : <ChallengeBrowser key={`${competitionId}:${user?.id || 'guest'}`} challenges={challenges} solvedChallenges={solvedChallenges} unlockedHints={unlockedHints} isLoggedIn={!!user} competitionActive={isActive} />}
-    </div><aside><Panel><div className="lab-card-top mb-6"><h2 className="lab-eyebrow">Leaderboard</h2><ActionLink href={`/ctf/${competitionId}/leaderboard`} variant="secondary">View All ↗</ActionLink></div><LeaderboardTable entries={leaderboard} currentUserId={user?.id} limit={10} /></Panel></aside></div>
-  </PageShell>;
+  return (
+    <PageShell user={user} profile={profile} currentPath="/ctf" wide>
+      <Breadcrumbs
+        items={[
+          { label: "Events", href: "/events#ctf" },
+          { label: competition.title },
+        ]}
+      />
+      <PageHeading
+        eyebrow="CTF / Competition workspace"
+        title={competition.title}
+        transitionName={`competition-${competitionId}`}
+        description={competition.description}
+      >
+        <Badge tone={isActive ? "active" : hasEnded ? "neutral" : "gold"}>
+          {isActive ? "Active" : hasEnded ? "Ended" : "Upcoming"}
+        </Badge>
+      </PageHeading>
+      <div className="lab-summary">
+        <span>
+          <strong>{challenges?.length || 0}</strong> challenges
+        </span>
+        <span>
+          <strong>{totalPoints}</strong> possible points
+        </span>
+        <span>START: {startTime.toLocaleString()}</span>
+        <span>END: {endTime.toLocaleString()}</span>
+      </div>
+      <div className="lab-workspace">
+        <div className="min-w-0">
+          {user ? (
+            <Panel className="mb-6">
+              <div className="lab-card-top">
+                <div>
+                  <p className="lab-eyebrow">Your progress</p>
+                  <p className="mt-2">
+                    {solvedChallenges.length}/{challenges?.length || 0} solved
+                  </p>
+                </div>
+                <strong className="text-amber-300 text-2xl">
+                  {userPoints} <span className="text-sm">pts</span>
+                </strong>
+              </div>
+              <progress
+                className="lab-progress mt-5 w-full h-1"
+                value={solvedChallenges.length}
+                max={challenges?.length || 1}
+                aria-label="Challenges solved"
+              />
+            </Panel>
+          ) : (
+            <Feedback className="mb-6">
+              <Link className="underline" href="/login" prefetch={false}>
+                Log in
+              </Link>{" "}
+              to submit flags and track your progress.
+            </Feedback>
+          )}
+          {competition.rules && (
+            <Panel className="mb-6">
+              <p className="lab-eyebrow mb-3">Rules</p>
+              <p className="whitespace-pre-wrap lab-muted text-sm">
+                {competition.rules}
+              </p>
+            </Panel>
+          )}
+          {!hasStarted ? (
+            <Panel>
+              <Badge tone="gold">Locked</Badge>
+              <p className="mt-4">
+                Competition starts: {startTime.toLocaleString()}
+              </p>
+            </Panel>
+          ) : !challenges?.length ? (
+            <Panel>
+              <p className="lab-muted">No challenges available yet.</p>
+            </Panel>
+          ) : (
+            <ChallengeBrowser
+              key={`${competitionId}:${user?.id || "guest"}`}
+              challenges={challenges}
+              solvedChallenges={solvedChallenges}
+              unlockedHints={unlockedHints}
+              isLoggedIn={!!user}
+              competitionActive={isActive}
+            />
+          )}
+        </div>
+        <aside>
+          <Panel>
+            <div className="lab-card-top mb-6">
+              <h2 className="lab-eyebrow">Leaderboard</h2>
+              <ActionLink
+                href={`/ctf/${competitionId}/leaderboard`}
+                variant="secondary"
+              >
+                View All ↗
+              </ActionLink>
+            </div>
+            <LeaderboardTable
+              entries={leaderboard}
+              currentUserId={user?.id}
+              limit={10}
+            />
+          </Panel>
+        </aside>
+      </div>
+    </PageShell>
+  );
 }

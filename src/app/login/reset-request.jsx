@@ -13,10 +13,17 @@ export default function ResetRequest() {
   const labelClasses = "text-sm font-medium";
 
   return (
-    <form className="mt-8 space-y-4 border-t border-[var(--line)] pt-6" action={formAction}>
+    <form
+      className="mt-8 space-y-4 border-t border-[var(--line)] pt-6"
+      action={formAction}
+    >
       <div className="flex flex-col gap-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">Forgot password?</p>
-        <p className="text-sm text-slate-300">Enter your email and we&apos;ll send a reset link.</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
+          Forgot password?
+        </p>
+        <p className="text-sm text-slate-300">
+          Enter your email and we&apos;ll send a reset link.
+        </p>
       </div>
 
       <div className="space-y-2">
@@ -34,9 +41,7 @@ export default function ResetRequest() {
         />
       </div>
 
-      {state?.message && (
-        <Feedback tone={state.type}>{state.message}</Feedback>
-      )}
+      {state?.message && <Feedback tone={state.type}>{state.message}</Feedback>}
 
       <button
         type="submit"

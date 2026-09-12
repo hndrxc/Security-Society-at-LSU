@@ -127,7 +127,7 @@ export default function CompetitionForm({ competition }) {
 
         {state?.message && (
           <span className={`font-terminal text-sm ${
-            state.success ? 'text-[#39ff14]' : 'text-rose-400'
+            state.success ? 'text-[var(--cyber-green)]' : 'text-rose-400'
           }`}>
             {state.message}
           </span>

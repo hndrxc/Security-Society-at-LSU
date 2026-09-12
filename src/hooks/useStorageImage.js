@@ -1,6 +1,6 @@
-'use client';
-import { useEffect, useMemo, useState } from 'react';
-import { createClient } from '../../utils/supabase/client';
+"use client";
+import { useEffect, useMemo, useState } from "react";
+import { createClient } from "../../utils/supabase/client";
 
 export function useStorageImage({ bucket, path, expiresIn = 3600 } = {}) {
   const supabase = useMemo(() => createClient(), []);
@@ -12,16 +12,28 @@ export function useStorageImage({ bucket, path, expiresIn = 3600 } = {}) {
     let cancelled = false;
     async function fetchUrl() {
       try {
-        const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
-        const url = data?.signedUrl || supabase.storage.from(bucket).getPublicUrl(path).data?.publicUrl || null;
+        const { data, error } = await supabase.storage
+          .from(bucket)
+          .createSignedUrl(path, expiresIn);
+        const url =
+          data?.signedUrl ||
+          supabase.storage.from(bucket).getPublicUrl(path).data?.publicUrl ||
+          null;
         if (!cancelled) setResult({ key, url, error });
       } catch (error) {
         if (!cancelled) setResult({ key, url: null, error });
       }
     }
     fetchUrl();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [bucket, path, expiresIn, revision, key, supabase]);
   const current = result?.key === key ? result : null;
-  return { url: current?.url || null, loading: Boolean(bucket && path && !current), error: current?.error || null, refresh: () => setRevision(r => r + 1) };
+  return {
+    url: current?.url || null,
+    loading: Boolean(bucket && path && !current),
+    error: current?.error || null,
+    refresh: () => setRevision((r) => r + 1),
+  };
 }

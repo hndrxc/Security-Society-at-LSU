@@ -122,7 +122,7 @@ export default async function ChallengesPage({ params }) {
                         <span className="font-semibold text-white">{challenge.title}</span>
                         <span className={`rounded px-2 py-0.5 font-terminal text-xs ${
                           challenge.is_visible
-                            ? 'bg-[#39ff14]/20 text-[#39ff14]'
+                            ? 'bg-[var(--cyber-green)]/20 text-[var(--cyber-green)]'
                             : 'bg-slate-500/20 text-slate-400'
                         }`}>
                           {challenge.is_visible ? 'VISIBLE' : 'HIDDEN'}
@@ -132,7 +132,7 @@ export default async function ChallengesPage({ params }) {
                         <span className="text-purple-300">{challenge.category}</span>
                         <span>{challenge.difficulty}</span>
                         <span className="text-amber-300">{challenge.points} pts</span>
-                        <span className="text-[#39ff14]">{solveMap[challenge.id] || 0} solves</span>
+                        <span className="text-[var(--cyber-green)]">{solveMap[challenge.id] || 0} solves</span>
                       </div>
                     </div>
                   </div>

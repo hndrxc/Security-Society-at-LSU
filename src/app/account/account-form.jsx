@@ -48,7 +48,11 @@ export default function AccountForm({ user, isProfileIncomplete = false }) {
         return;
       }
 
-      const { data, error, status: statusCode } = await supabase
+      const {
+        data,
+        error,
+        status: statusCode,
+      } = await supabase
         .from("profiles")
         .select("full_name, username, avatar_url")
         .eq("id", user.id)
@@ -118,7 +122,9 @@ export default function AccountForm({ user, isProfileIncomplete = false }) {
         <div className="border border-amber-400/50 bg-amber-500/10 p-4 rounded-lg">
           <p className="font-terminal text-sm text-amber-200">
             <span className="text-amber-400">[REQUIRED]</span>
-            <span className="ml-2">Complete your profile to access all features.</span>
+            <span className="ml-2">
+              Complete your profile to access all features.
+            </span>
           </p>
         </div>
       )}
@@ -149,7 +155,9 @@ export default function AccountForm({ user, isProfileIncomplete = false }) {
           placeholder="Add your name"
         />
         {validationErrors.fullname && (
-          <p role="alert" className="text-xs text-rose-400">{validationErrors.fullname}</p>
+          <p role="alert" className="text-xs text-rose-400">
+            {validationErrors.fullname}
+          </p>
         )}
       </div>
       <div className="grid gap-2">
@@ -169,7 +177,9 @@ export default function AccountForm({ user, isProfileIncomplete = false }) {
           title="3-30 characters, letters, numbers, underscore, or hyphen"
         />
         {validationErrors.username && (
-          <p role="alert" className="text-xs text-rose-400">{validationErrors.username}</p>
+          <p role="alert" className="text-xs text-rose-400">
+            {validationErrors.username}
+          </p>
         )}
       </div>
 

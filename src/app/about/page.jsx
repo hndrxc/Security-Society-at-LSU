@@ -4,7 +4,7 @@ import Reveal from "@/components/ui/Reveal";
 import OfficerGrid from "@/components/about/OfficerGrid";
 import { getAuthData } from "../../../utils/auth/getAuthData";
 
-const officers = [ 
+const officers = [
   // {
   //   name: "First Last",
   //   role: "role",
@@ -29,7 +29,7 @@ const officers = [
     description:
       "Responsible for communication between LSU, board, and members. This includes maintenance of newsletter and calendar. True president.",
   },
-  
+
   {
     name: "Carter Hendricks",
     role: "Web-Master",
@@ -51,8 +51,7 @@ const officers = [
     role: "Treasurer",
     team: "Officer",
     photoPath: "benito.png",
-    description:
-      "Responsible for SSL funds and fundraising",
+    description: "Responsible for SSL funds and fundraising",
   },
   {
     name: "Taylor Graham",
@@ -102,15 +101,56 @@ const officers = [
     description:
       "Secret leader of LSU's secret Cybersecurity cult and facilitator of communications between SSL and outside parties.",
   },
-  
 ];
 
 export default async function AboutPage() {
   const { user, profile } = await getAuthData();
 
-  return <PageShell user={user} profile={profile} currentPath="/about">
-    <Reveal className="lab-about-hero"><PageHeading eyebrow="02 / The people behind SSL" title="We teach, compete, and secure together." description="The Security Society at LSU empowers students to build defensive and offensive skills through labs, competitions, and mentorship. We welcome every background, from first-timers curious about cyber to veterans looking to lead red and blue team operations." /><div className="lab-actions"><ActionLink href="#officers">Meet the officers ↓</ActionLink><ActionLink href="/" variant="secondary">Back to home</ActionLink></div></Reveal>
-    <div className="lab-stat-grid">{[['Founded','2017'],['Focus','Hands-on labs'],['Meetings','Fridays']].map(([label,value])=><Panel key={label}><p className="lab-eyebrow">{label}</p><strong>{value}</strong></Panel>)}</div>
-    <section id="officers"><div className="lab-section-title"><div><p className="lab-eyebrow">Personnel / {officers.length} members</p><h2>Meet the Officers</h2><p className="lab-muted text-sm mt-3">A Quick Introduction to our Officers</p></div><ActionLink href="mailto:securitysocietylsu@protonmail.com" variant="secondary">Contact us ↗</ActionLink></div><OfficerGrid officers={officers} /></section>
-  </PageShell>;
+  return (
+    <PageShell user={user} profile={profile} currentPath="/about">
+      <Reveal className="lab-about-hero">
+        <PageHeading
+          eyebrow="02 / The people behind SSL"
+          title="We teach, compete, and secure together."
+          description="The Security Society at LSU empowers students to build defensive and offensive skills through labs, competitions, and mentorship. We welcome every background, from first-timers curious about cyber to veterans looking to lead red and blue team operations."
+        />
+        <div className="lab-actions">
+          <ActionLink href="#officers">Meet the officers ↓</ActionLink>
+          <ActionLink href="/" variant="secondary">
+            Back to home
+          </ActionLink>
+        </div>
+      </Reveal>
+      <div className="lab-stat-grid">
+        {[
+          ["Founded", "2017"],
+          ["Focus", "Hands-on labs"],
+          ["Meetings", "Fridays"],
+        ].map(([label, value]) => (
+          <Panel key={label}>
+            <p className="lab-eyebrow">{label}</p>
+            <strong>{value}</strong>
+          </Panel>
+        ))}
+      </div>
+      <section id="officers">
+        <div className="lab-section-title">
+          <div>
+            <p className="lab-eyebrow">Personnel / {officers.length} members</p>
+            <h2>Meet the Officers</h2>
+            <p className="lab-muted text-sm mt-3">
+              A Quick Introduction to our Officers
+            </p>
+          </div>
+          <ActionLink
+            href="mailto:securitysocietylsu@protonmail.com"
+            variant="secondary"
+          >
+            Contact us ↗
+          </ActionLink>
+        </div>
+        <OfficerGrid officers={officers} />
+      </section>
+    </PageShell>
+  );
 }

@@ -1,2 +1,2 @@
-import { domAnimation } from 'motion/react';
+import { domAnimation } from "motion/react";
 export default domAnimation;

@@ -106,7 +106,7 @@ export default async function SubmissionsPage({ searchParams }) {
           href="/admin/ctf/submissions?filter=correct"
           className={`rounded px-3 py-1.5 font-terminal text-xs transition-colors ${
             filter === 'correct'
-              ? 'bg-[#39ff14]/20 text-[#39ff14]'
+              ? 'bg-[var(--cyber-green)]/20 text-[var(--cyber-green)]'
               : 'bg-slate-700/30 text-slate-400 hover:bg-slate-600/30'
           }`}
         >
@@ -148,7 +148,7 @@ export default async function SubmissionsPage({ searchParams }) {
                 <tr key={sub.id} className="hover:bg-purple-500/5">
                   <td className="px-4 py-3">
                     <span className={`font-terminal text-xs ${
-                      sub.is_correct ? 'text-[#39ff14]' : 'text-rose-400'
+                      sub.is_correct ? 'text-[var(--cyber-green)]' : 'text-rose-400'
                     }`}>
                       [{sub.is_correct ? 'CORRECT' : 'WRONG'}]
                     </span>

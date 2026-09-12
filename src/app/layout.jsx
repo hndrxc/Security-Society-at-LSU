@@ -19,7 +19,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#050308",
+  themeColor: "#0b0c10",
 };
 
 export default function RootLayout({ children }) {
@@ -35,9 +35,7 @@ export default function RootLayout({ children }) {
         >
           Skip to main content
         </a>
-        <RonProvider>
-          {children}
-        </RonProvider>
+        <RonProvider>{children}</RonProvider>
         <Analytics />
       </body>
     </html>
