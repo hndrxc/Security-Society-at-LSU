@@ -10,6 +10,10 @@ export default function PageShell({
   wide = false,
   className = "",
 }) {
+  const isPublicPage = ["/", "/about", "/events", "/kernels", "/ctf"].some(
+    (path) => currentPath === path || (path !== "/" && currentPath?.startsWith(`${path}/`)),
+  );
+
   return (
     <PageBackground>
       <Navbar
@@ -21,7 +25,7 @@ export default function PageShell({
       <TransitionRegion name="page-content">
         <main
           id="main-content"
-          className={`lab-container ${wide ? "lab-container--wide" : ""} ${className}`}
+          className={`lab-container ${wide ? "lab-container--wide" : ""} ${isPublicPage ? "lab-public" : ""} ${className}`}
         >
           {children}
         </main>

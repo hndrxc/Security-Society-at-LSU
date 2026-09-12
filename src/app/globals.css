@@ -1151,6 +1151,50 @@ h4 {
     padding: 18px;
   }
 }
+@media (max-width: 760px) {
+  .lab-public,
+  .lab-auth-intro,
+  .lab-auth-card > h2,
+  .lab-auth-card > .lab-eyebrow {
+    text-align: center;
+  }
+
+  .lab-public .lab-heading,
+  .lab-public .lab-section-title,
+  .lab-public .lab-live {
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .lab-public .lab-actions,
+  .lab-public .lab-section-nav,
+  .lab-public .lab-summary,
+  .lab-public .lab-event-meta,
+  .lab-public .lab-breadcrumbs ol {
+    justify-content: center;
+  }
+
+  .lab-public .lab-description,
+  .lab-public .lab-hero-copy > p {
+    margin-inline: auto;
+  }
+
+  .lab-public .lab-stat-grid .lab-panel {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .lab-public :is(form, table, pre, ul, ol, .lab-workspace),
+  .lab-auth form {
+    text-align: left;
+  }
+
+  .lab-footer {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

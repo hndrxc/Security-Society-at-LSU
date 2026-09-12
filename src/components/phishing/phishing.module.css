@@ -788,6 +788,24 @@
   }
 }
 
+@media (max-width: 760px) {
+  .heroCopy,
+  .gameHeading,
+  .challengePrompt,
+  .feedback {
+    text-align: center;
+  }
+
+  .heroCopy .eyebrow {
+    justify-content: center;
+  }
+
+  .heroDescription,
+  .gameHeading > p {
+    margin-inline: auto;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page *,
   .page *::before,
