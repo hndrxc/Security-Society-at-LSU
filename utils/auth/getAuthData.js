@@ -1,13 +1,15 @@
+import { cache } from "react";
 import { createClient } from "../supabase/server";
-import { isProfileComplete } from "./requireCompleteProfile";
+import { isProfileComplete } from "./profile";
 
 /**
  * Get authenticated user and their profile data.
  * For use in server components.
  *
- * @returns {Promise<{user: object|null, profile: object|null, isProfileComplete: boolean}>}
+ * @returns {Promise<{supabase: object, user: object|null, profile: object|null, isProfileComplete: boolean}>}
  */
-export async function getAuthData() {
+// Share authentication reads within a server render, never across requests.
+export const getAuthData = cache(async function getAuthData() {
   const supabase = await createClient();
 
   const {
@@ -15,7 +17,7 @@ export async function getAuthData() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { user: null, profile: null, isProfileComplete: false };
+    return { supabase, user: null, profile: null, isProfileComplete: false };
   }
 
   const { data: profile } = await supabase
@@ -24,5 +26,5 @@ export async function getAuthData() {
     .eq("id", user.id)
     .single();
 
-  return { user, profile, isProfileComplete: isProfileComplete(profile) };
-}
+  return { supabase, user, profile, isProfileComplete: isProfileComplete(profile) };
+});

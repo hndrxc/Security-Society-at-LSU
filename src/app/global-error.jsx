@@ -1,7 +1,7 @@
 "use client";
 import "./globals.css";
 
-export default function GlobalError({ error, reset }) {
+export default function GlobalError({ reset }) {
   return (
     <html lang="en">
       <body className="min-h-screen bg-black text-slate-100">

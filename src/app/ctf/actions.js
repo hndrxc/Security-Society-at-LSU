@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '../../../utils/supabase/server'
-import { isProfileComplete } from '../../../utils/auth/requireCompleteProfile'
+import { isProfileComplete } from '../../../utils/auth/profile'
 
 export async function submitFlag(prevState, formData) {
   const supabase = await createClient()
@@ -123,18 +123,17 @@ export async function getUserChallengeStatus(competitionId) {
     return { solvedChallenges: [], unlockedHints: [] }
   }
 
-  // Get solved challenges
-  const { data: solves } = await supabase
-    .from('ctf_solves')
-    .select('challenge_id, points_awarded, solved_at')
-    .eq('user_id', user.id)
-    .eq('competition_id', competitionId)
-
-  // Get unlocked hints
-  const { data: hints } = await supabase
-    .from('ctf_hint_unlocks')
-    .select('challenge_id, hint_number, points_deducted')
-    .eq('user_id', user.id)
+  const [{ data: solves }, { data: hints }] = await Promise.all([
+    supabase
+      .from('ctf_solves')
+      .select('challenge_id, points_awarded, solved_at')
+      .eq('user_id', user.id)
+      .eq('competition_id', competitionId),
+    supabase
+      .from('ctf_hint_unlocks')
+      .select('challenge_id, hint_number, points_deducted')
+      .eq('user_id', user.id),
+  ])
 
   return {
     solvedChallenges: solves || [],

@@ -1,7 +1,7 @@
 "use client";
 import { Feedback } from "@/components/ui/primitives";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createClient } from "../../../utils/supabase/client";
 import { signOut } from "./actions";
 
@@ -22,60 +22,16 @@ function validateFullname(value) {
   return null;
 }
 
-export default function AccountForm({ user, isProfileIncomplete = false }) {
+export default function AccountForm({ user, profile, isProfileIncomplete = false }) {
   const supabase = useMemo(() => createClient(), []);
-  const [loading, setLoading] = useState(true);
-  const [fullname, setFullname] = useState("");
-  const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [fullname, setFullname] = useState(profile?.full_name || "");
+  const [username, setUsername] = useState(profile?.username || "");
   const [status, setStatus] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
 
   const inputClasses = "lab-input";
   const labelClasses = "text-sm font-medium";
-
-  const getProfile = useCallback(async () => {
-    try {
-      setLoading(true);
-      setStatus(null);
-
-      if (!user) {
-        setFullname("");
-        setUsername("");
-        setStatus({
-          type: "error",
-          message: "You need to be signed in to manage your account.",
-        });
-        return;
-      }
-
-      const {
-        data,
-        error,
-        status: statusCode,
-      } = await supabase
-        .from("profiles")
-        .select("full_name, username, avatar_url")
-        .eq("id", user.id)
-        .single();
-
-      if (error && statusCode !== 406) {
-        throw error;
-      }
-
-      if (data) {
-        setFullname(data.full_name || "");
-        setUsername(data.username || "");
-      }
-    } catch (error) {
-      setStatus({ type: "error", message: "Error loading user data." });
-    } finally {
-      setLoading(false);
-    }
-  }, [user, supabase]);
-
-  useEffect(() => {
-    getProfile();
-  }, [user, getProfile]);
 
   async function updateProfile({ fullname, username }) {
     // Validate inputs before submission

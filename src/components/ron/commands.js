@@ -156,7 +156,7 @@ Press ESC to close the terminal.
     echo: (args) => ({ output: args.join(' '), type: 'success' }),
 
     // Easter egg commands
-    sudo: (args) => ({
+    sudo: () => ({
       output: `[sudo] password for ${username}:
 ${username} is not in the sudoers file. This incident will be reported.`,
       type: 'error'

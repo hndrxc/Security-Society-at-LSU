@@ -1,42 +1,22 @@
 // src/app/admin/ctf/competitions/page.jsx
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "../../../../../utils/supabase/server";
-
-// Helper to verify admin authorization
-async function requireAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.is_admin) {
-    redirect("/");
-  }
-
-  return supabase;
-}
+import { requireAdminPage } from "../../../../../utils/auth/requireAdmin";
 
 export default async function CompetitionsPage() {
-  const supabase = await requireAdmin();
+  const { supabase } = await requireAdminPage();
 
-  const { data: competitions } = await supabase
-    .from("ctf_competitions")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  // Get challenge counts
-  const { data: challengeCounts } = await supabase
-    .from("ctf_challenges")
-    .select("competition_id");
+  const [
+    { data: competitions },
+    { data: challengeCounts },
+  ] = await Promise.all([
+    supabase
+      .from("ctf_competitions")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("ctf_challenges")
+      .select("competition_id"),
+  ]);
 
   const countMap = (challengeCounts || []).reduce((acc, ch) => {
     acc[ch.competition_id] = (acc[ch.competition_id] || 0) + 1;
@@ -81,7 +61,6 @@ export default async function CompetitionsPage() {
             const end = new Date(comp.ends_at);
             const isUpcoming = now < start;
             const isActive = now >= start && now <= end;
-            const isEnded = now > end;
 
             return (
               <div

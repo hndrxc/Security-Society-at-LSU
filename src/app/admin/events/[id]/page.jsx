@@ -1,34 +1,12 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { createClient } from "../../../../../utils/supabase/server";
+import { notFound } from "next/navigation";
+import { requireAdminPage } from "../../../../../utils/auth/requireAdmin";
 import EventForm from "@/components/admin/EventForm";
 import DeleteEventButton from "@/components/admin/DeleteEventButton";
 
-// Helper to verify admin authorization
-async function requireAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.is_admin) {
-    redirect("/");
-  }
-
-  return supabase;
-}
-
 export default async function EditEventPage({ params }) {
   const { id } = await params;
-  const supabase = await requireAdmin();
+  const { supabase } = await requireAdminPage();
 
   const [{ data: event, error }, { data: competitions, error: competitionsError }] = await Promise.all([
     supabase.from("events").select("*").eq("id", id).single(),

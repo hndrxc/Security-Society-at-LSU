@@ -5,43 +5,43 @@ import { createClient } from "../../../utils/supabase/server";
 export default async function AdminDashboard() {
   const supabase = await createClient();
 
-  // Get competition stats
-  const { count: totalCompetitions } = await supabase
-    .from("ctf_competitions")
-    .select("*", { count: "exact", head: true });
-
-  const { count: activeCompetitions } = await supabase
-    .from("ctf_competitions")
-    .select("*", { count: "exact", head: true })
-    .eq("is_active", true);
-
-  // Get challenge count
-  const { count: totalChallenges } = await supabase
-    .from("ctf_challenges")
-    .select("*", { count: "exact", head: true });
-
-  // Get submission stats
-  const { count: totalSubmissions } = await supabase
-    .from("ctf_submissions")
-    .select("*", { count: "exact", head: true });
-
-  const { count: correctSubmissions } = await supabase
-    .from("ctf_submissions")
-    .select("*", { count: "exact", head: true })
-    .eq("is_correct", true);
-
-  // Get recent submissions
-  const { data: recentSubmissions } = await supabase
-    .from("ctf_submissions")
-    .select(`
+  const [
+    { count: totalCompetitions },
+    { count: activeCompetitions },
+    { count: totalChallenges },
+    { count: totalSubmissions },
+    { count: correctSubmissions },
+    { data: recentSubmissions },
+  ] = await Promise.all([
+    supabase
+      .from("ctf_competitions")
+      .select("*", { count: "exact", head: true }),
+    supabase
+      .from("ctf_competitions")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true),
+    supabase
+      .from("ctf_challenges")
+      .select("*", { count: "exact", head: true }),
+    supabase
+      .from("ctf_submissions")
+      .select("*", { count: "exact", head: true }),
+    supabase
+      .from("ctf_submissions")
+      .select("*", { count: "exact", head: true })
+      .eq("is_correct", true),
+    supabase
+      .from("ctf_submissions")
+      .select(`
       id,
       submitted_at,
       is_correct,
       challenge_id,
       ctf_challenges (title)
     `)
-    .order("submitted_at", { ascending: false })
-    .limit(5);
+      .order("submitted_at", { ascending: false })
+      .limit(5),
+  ]);
 
   return (
     <div className="space-y-8">

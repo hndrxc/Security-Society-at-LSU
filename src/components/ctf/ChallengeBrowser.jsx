@@ -5,6 +5,8 @@ import { Toggle } from "@base-ui/react/toggle";
 import { useRouter } from "next/navigation";
 import ChallengeCard from "./ChallengeCard";
 
+const EMPTY_HINTS = [];
+
 export default function ChallengeBrowser({
   challenges,
   solvedChallenges,
@@ -17,6 +19,12 @@ export default function ChallengeBrowser({
   const [confirmed, setConfirmed] = useState({});
   const router = useRouter();
   const solved = new Map(solvedChallenges.map((s) => [s.challenge_id, s]));
+  const hintsByChallenge = new Map();
+  for (const hint of unlockedHints) {
+    const hints = hintsByChallenge.get(hint.challenge_id);
+    if (hints) hints.push(hint);
+    else hintsByChallenge.set(hint.challenge_id, [hint]);
+  }
   const categories = [
     ...new Set(challenges.map((c) => c.category || "misc")),
   ].sort();
@@ -80,9 +88,7 @@ export default function ChallengeBrowser({
               solved.has(challenge.id) || Boolean(confirmed[challenge.id])
             }
             solveInfo={solved.get(challenge.id)}
-            unlockedHints={unlockedHints.filter(
-              (h) => h.challenge_id === challenge.id,
-            )}
+            unlockedHints={hintsByChallenge.get(challenge.id) || EMPTY_HINTS}
             isLoggedIn={isLoggedIn}
             competitionActive={competitionActive}
             onSolve={(result) => {

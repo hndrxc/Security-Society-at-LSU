@@ -5,14 +5,6 @@ import OfficerGrid from "@/components/about/OfficerGrid";
 import { getAuthData } from "../../../utils/auth/getAuthData";
 
 const officers = [
-  // {
-  //   name: "First Last",
-  //   role: "role",
-  //   team: "class",
-  //   photoPath: "cam.png",
-  //   description:
-  //     "Very long and drawn out description",
-  // },
   {
     name: "Peyton 'Tai' Tran",
     role: "President",
@@ -85,14 +77,6 @@ const officers = [
     description:
       "Ambassador for the club, responsible for representing the club at events and promoting the club to potential members.",
   },
-  // {
-  //   name: "Aeris Kelleher",
-  //   role: "CTF Team/WiCyS President",
-  //   team: "CTF/Collaborator",
-  //   photoPath: "aeris.png",
-  //   description:
-  //     "Responsible for organizing Hello, Hacker! and helping to organize CTF meetings, future hackathons, and train for future CTF competitions",
-  // },
   {
     name: "Ronald Gibson, III",
     role: "Senior Advisor",

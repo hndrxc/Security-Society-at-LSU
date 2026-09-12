@@ -21,41 +21,38 @@ export const revalidate = 30;
 export default async function CompetitionPage({ params }) {
   const { competitionId } = await params;
   const supabase = await createClient();
-  const { user, profile } = await getAuthData();
-
-  // Fetch competition
-  const { data: competition, error: compError } = await supabase
-    .from("ctf_competitions")
-    .select("*")
-    .eq("id", competitionId)
-    .eq("is_active", true)
-    .single();
+  const [{ user, profile }, { data: competition, error: compError }] = await Promise.all([
+    getAuthData(),
+    supabase
+      .from("ctf_competitions")
+      .select("id,title,description,rules,starts_at,ends_at")
+      .eq("id", competitionId)
+      .eq("is_active", true)
+      .single(),
+  ]);
 
   if (compError || !competition) {
     notFound();
   }
 
-  // Fetch challenges
-  const { data: challenges } = await supabase
-    .from("ctf_challenges")
-    .select("*")
-    .eq("competition_id", competitionId)
-    .eq("is_visible", true)
-    .order("sort_order", { ascending: true })
-    .order("points", { ascending: true });
-
-  // Fetch leaderboard
-  const { data: leaderboard } = await supabase.rpc(
-    "get_competition_leaderboard",
-    {
-      p_competition_id: competitionId,
-      p_limit: 10,
-    },
-  );
-
-  // Get user's solve status
-  const { solvedChallenges, unlockedHints } =
-    await getUserChallengeStatus(competitionId);
+  const [
+    { data: challenges },
+    { data: leaderboard },
+    { solvedChallenges, unlockedHints },
+  ] = await Promise.all([
+    supabase
+      .from("ctf_challenges")
+      .select("id,title,description,category,difficulty,points,flag_format,challenge_url,attachment_url,hint_1,hint_1_cost,hint_2,hint_2_cost,hint_3,hint_3_cost")
+      .eq("competition_id", competitionId)
+      .eq("is_visible", true)
+      .order("sort_order", { ascending: true })
+      .order("points", { ascending: true }),
+    supabase.rpc(
+      "get_competition_leaderboard",
+      { p_competition_id: competitionId, p_limit: 10 },
+    ),
+    getUserChallengeStatus(competitionId),
+  ]);
 
   // Competition status
   const now = new Date();

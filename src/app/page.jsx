@@ -2,8 +2,8 @@ import PageShell from "@/components/layout/PageShell";
 import { ActionLink, Badge, Panel } from "@/components/ui/primitives";
 import Reveal from "@/components/ui/Reveal";
 import { createClient } from "../../utils/supabase/server";
+import { getAuthData } from "../../utils/auth/getAuthData";
 import { getLiveCtfEvent } from "../../utils/events/ctf";
-// import SnowfallEffect from "@/components/SnowfallEffect";
 
 export const revalidate = 60;
 const highlights = [
@@ -28,12 +28,6 @@ const highlights = [
   },
 ];
 
-// const stats = [
-//   { label: "Members", value: "80+" },
-//   { label: "Hours invested", value: "67k" },
-//   { label: "Meetings", value: "3" },
-// ];
-
 const discordServerId = process.env.NEXT_PUBLIC_DISCORD_SERVER_ID;
 const discordInvite = process.env.NEXT_PUBLIC_DISCORD_INVITE;
 
@@ -41,26 +35,10 @@ export default async function Home() {
   const supabase = await createClient();
 
   const now = new Date().toISOString();
-  const [
-    {
-      data: { user },
-    },
-    { data: activeEvent },
-  ] = await Promise.all([
-    supabase.auth.getUser(),
+  const [{ user, profile }, { data: activeEvent }] = await Promise.all([
+    getAuthData(),
     getLiveCtfEvent(supabase, now),
   ]);
-
-  // Fetch user profile if logged in
-  let profile = null;
-  if (user) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("is_admin, username, full_name")
-      .eq("id", user.id)
-      .single();
-    profile = data;
-  }
 
   const accountHref = user ? "/account" : "/login";
   const displayName = profile?.username || "hacker";

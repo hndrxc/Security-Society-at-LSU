@@ -1,31 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "../../../../utils/supabase/server";
-
-// Helper to verify admin authorization
-async function requireAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.is_admin) {
-    redirect("/");
-  }
-
-  return supabase;
-}
+import { requireAdminPage } from "../../../../utils/auth/requireAdmin";
 
 export default async function EventsPage() {
-  const supabase = await requireAdmin();
+  const { supabase } = await requireAdminPage();
 
   const [{ data: events }, { data: competitions }] = await Promise.all([
     supabase.from("events").select("*").order("starts_at", { ascending: false }),

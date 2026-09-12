@@ -1,30 +1,11 @@
 // src/app/admin/layout.jsx
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "../../../utils/supabase/server";
-import { isProfileComplete } from "../../../utils/auth/requireCompleteProfile";
+import { requireAdminPage } from "../../../utils/auth/requireAdmin";
+import { isProfileComplete } from "../../../utils/auth/profile";
 
 export default async function AdminLayout({ children }) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  // Check if user is admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_admin, username, full_name")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.is_admin) {
-    redirect("/");
-  }
+  const { user, profile } = await requireAdminPage();
 
   // Require complete profile for admin access
   if (!isProfileComplete(profile)) {

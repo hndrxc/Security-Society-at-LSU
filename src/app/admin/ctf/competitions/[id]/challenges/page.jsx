@@ -1,60 +1,40 @@
 // src/app/admin/ctf/competitions/[id]/challenges/page.jsx
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import ChallengeForm from "@/components/admin/ChallengeForm";
 import DeleteChallengeButton from "@/components/admin/DeleteChallengeButton";
-import { createClient } from "../../../../../../../utils/supabase/server";
-
-// Helper to verify admin authorization
-async function requireAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.is_admin) {
-    redirect("/");
-  }
-
-  return supabase;
-}
+import { requireAdminPage } from "../../../../../../../utils/auth/requireAdmin";
 
 export default async function ChallengesPage({ params }) {
   const { id } = await params;
-  const supabase = await requireAdmin();
+  const { supabase } = await requireAdminPage();
 
   // Get competition
   const { data: competition, error: compError } = await supabase
-    .from("ctf_competitions")
-    .select("id, title")
-    .eq("id", id)
-    .single();
+      .from("ctf_competitions")
+      .select("id, title")
+      .eq("id", id)
+      .single();
 
   if (compError || !competition) {
     notFound();
   }
 
-  // Get challenges
-  const { data: challenges } = await supabase
-    .from("ctf_challenges")
-    .select("*")
-    .eq("competition_id", id)
-    .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: true });
-
-  // Get solve counts per challenge
-  const { data: solveCounts } = await supabase
-    .from("ctf_solves")
-    .select("challenge_id")
-    .eq("competition_id", id);
+  const [
+    { data: challenges },
+    { data: solveCounts },
+  ] = await Promise.all([
+    supabase
+      .from("ctf_challenges")
+      .select("*")
+      .eq("competition_id", id)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("ctf_solves")
+      .select("challenge_id")
+      .eq("competition_id", id),
+  ]);
 
   const solveMap = (solveCounts || []).reduce((acc, s) => {
     acc[s.challenge_id] = (acc[s.challenge_id] || 0) + 1;

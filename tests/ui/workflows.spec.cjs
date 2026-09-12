@@ -1,177 +1,471 @@
-const { test, expect } = require('@playwright/test');
-const fixture = 'http://127.0.0.1:54329';
-const competition = '/ctf/00000000-0000-4000-8000-000000000001';
-async function login(context, request, role = 'member') {
-  const session = await (await request.get(`${fixture}/__session?role=${role}`)).json();
-  await context.addCookies([{name:'sb-127-auth-token',value:'base64-'+Buffer.from(JSON.stringify(session)).toString('base64url'),domain:'localhost',path:'/'}]);
+const { test, expect } = require("@playwright/test");
+const fixture = "http://127.0.0.1:54329";
+const competition = "/ctf/00000000-0000-4000-8000-000000000001";
+async function login(context, request, role = "member") {
+  const session = await (
+    await request.get(`${fixture}/__session?role=${role}`)
+  ).json();
+  await context.addCookies([
+    {
+      name: "sb-127-auth-token",
+      value:
+        "base64-" + Buffer.from(JSON.stringify(session)).toString("base64url"),
+      domain: "localhost",
+      path: "/",
+    },
+  ]);
 }
 test.beforeEach(async ({ request, context }, info) => {
-  await request.post(`${fixture}/__reset`,{data:{}});
-  await context.setExtraHTTPHeaders({'x-forwarded-for':`ui-${info.testId}-${Date.now()}`});
+  await request.post(`${fixture}/__reset`, { data: {} });
+  await context.setExtraHTTPHeaders({
+    "x-forwarded-for": `ui-${info.testId}-${Date.now()}`,
+  });
 });
-test('mobile menu supports keyboard focus, escape, navigation and active states', async ({ page }) => {
-  await page.setViewportSize({width:390,height:844});
-  await page.goto('/');
-  const trigger = page.getByRole('button',{name:'Open navigation'});
+test("mobile menu supports keyboard focus, escape, navigation and active states", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const trigger = page.getByRole("button", { name: "Open navigation" });
   await trigger.click();
-  await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.getByRole('link',{name:'Home',exact:true})).toHaveAttribute('aria-current','page');
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Home", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(trigger).toBeFocused();
   await trigger.click();
-  await page.getByRole('navigation',{name:'Mobile navigation'}).getByRole('link',{name:'Events'}).click();
-  await expect(page).toHaveURL('/events');
-  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Mobile navigation" })
+    .getByRole("link", { name: "Events" })
+    .click();
+  await expect(page).toHaveURL("/events");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
 });
-test('filters and expansion preserve drafts and purchased hints', async ({ page, context, request }) => {
-  await login(context,request);
+test("filters and expansion preserve drafts and purchased hints", async ({
+  page,
+  context,
+  request,
+}) => {
+  await login(context, request);
   await page.goto(competition);
-  const card = page.locator('.lab-challenge').filter({has:page.getByRole('heading',{name:'Headers up'})});
-  await card.getByRole('button',{name:/Headers up/}).click();
-  await card.getByLabel('Flag',{exact:true}).fill('SSL{my-draft}');
-  await card.getByRole('button',{name:/Headers up/}).click();
-  await card.getByRole('button',{name:/Headers up/}).click();
-  await expect(card.getByLabel('Flag',{exact:true})).toHaveValue('SSL{my-draft}');
-  await card.getByRole('button',{name:/Hint 1/}).click();
-  await expect(card.getByText('Inspect the response headers.')).toBeVisible();
-  await page.getByRole('combobox',{name:'Category'}).selectOption('crypto');
+  const card = page
+    .locator(".lab-challenge")
+    .filter({ has: page.getByRole("heading", { name: "Headers up" }) });
+  await card.getByRole("button", { name: /Headers up/ }).click();
+  await card.getByLabel("Flag", { exact: true }).fill("SSL{my-draft}");
+  await card.getByRole("button", { name: /Headers up/ }).click();
+  await card.getByRole("button", { name: /Headers up/ }).click();
+  await expect(card.getByLabel("Flag", { exact: true })).toHaveValue(
+    "SSL{my-draft}",
+  );
+  await card.getByRole("button", { name: /Hint 1/ }).click();
+  await expect(card.getByText("Inspect the response headers.")).toBeVisible();
+  await page.getByRole("combobox", { name: "Category" }).selectOption("crypto");
   await expect(card).not.toBeVisible();
-  await page.getByRole('combobox',{name:'Category'}).selectOption('all');
-  await expect(card.getByLabel('Flag',{exact:true})).toHaveValue('SSL{my-draft}');
-  await expect(card.getByText('Inspect the response headers.')).toBeVisible();
-  await page.getByRole('button',{name:'Solved',exact:true}).click();
+  await page.getByRole("combobox", { name: "Category" }).selectOption("all");
+  await expect(card.getByLabel("Flag", { exact: true })).toHaveValue(
+    "SSL{my-draft}",
+  );
+  await expect(card.getByText("Inspect the response headers.")).toBeVisible();
+  await page.getByRole("button", { name: "Solved", exact: true }).click();
   await expect(card).not.toBeVisible();
-  await expect(page.getByRole('heading',{name:'Hidden in plain sight'})).toBeVisible();
-  await page.getByRole('button',{name:'Unsolved',exact:true}).click();
+  await expect(
+    page.getByRole("heading", { name: "Hidden in plain sight" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Unsolved", exact: true }).click();
   await expect(card).toBeVisible();
-  await card.getByRole('button',{name:'Submit Flag'}).click();
-  await expect(card.getByRole('alert')).toContainText('Incorrect flag');
-  await card.getByLabel('Flag',{exact:true}).fill('SSL{correct}');
-  await card.getByRole('button',{name:'Submit Flag'}).click();
+  await card.getByRole("button", { name: "Submit Flag" }).click();
+  await expect(card.getByRole("alert")).toContainText("Incorrect flag");
+  await card.getByLabel("Flag", { exact: true }).fill("SSL{correct}");
+  await card.getByRole("button", { name: "Submit Flag" }).click();
   await expect(card).not.toBeVisible();
-  await page.getByRole('button',{name:'Solved',exact:true}).click();
+  await page.getByRole("button", { name: "Solved", exact: true }).click();
   await expect(card).toBeVisible();
-  await expect(card).toContainText('Correct flag!');
+  await expect(card).toContainText("Correct flag!");
   const state = await (await request.get(`${fixture}/__state`)).json();
   expect(state.ctf_hint_unlocks).toHaveLength(1);
-  expect(state.ctf_solves.filter(s=>s.challenge_id === 'challenge-0')).toHaveLength(1);
+  expect(
+    state.ctf_solves.filter((s) => s.challenge_id === "challenge-0"),
+  ).toHaveLength(1);
 });
-test('guest restrictions, breadcrumbs, direct links and back/forward', async ({ page }) => {
-  await page.goto('/events#ctf');
-  await expect(page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Events'})).toHaveAttribute('aria-current','page');
-  await page.locator('.lab-competition-card').first().click();
-  await expect(page.getByRole('button',{name:'Unsolved',exact:true})).toHaveCount(0);
-  await page.getByRole('button',{name:/Headers up/}).click();
-  await expect(page.getByText('[LOGIN REQUIRED TO SUBMIT FLAGS]').filter({visible:true})).toBeVisible();
-  await page.getByRole('link',{name:/View All/}).click();
-  await expect(page).toHaveURL(competition+'/leaderboard');
-  await expect(page.getByRole('navigation',{name:'Breadcrumb'})).toContainText('TigerSec');
-  await expect(page.getByRole('table')).toBeVisible();
-  await page.goBack(); await expect(page).toHaveURL(competition);
-  await page.goForward(); await expect(page).toHaveURL(competition+'/leaderboard');
+test("guest restrictions, breadcrumbs, direct links and back/forward", async ({
+  page,
+}) => {
+  await page.goto("/events#ctf");
+  await expect(
+    page
+      .getByRole("navigation", { name: "Main navigation" })
+      .getByRole("link", { name: "Events" }),
+  ).toHaveAttribute("aria-current", "page");
+  await page.locator(".lab-competition-card").first().click();
+  await expect(
+    page.getByRole("button", { name: "Unsolved", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: /Headers up/ }).click();
+  await expect(
+    page
+      .getByText("[LOGIN REQUIRED TO SUBMIT FLAGS]")
+      .filter({ visible: true }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: /View All/ }).click();
+  await expect(page).toHaveURL(competition + "/leaderboard");
+  await expect(
+    page.getByRole("navigation", { name: "Breadcrumb" }),
+  ).toContainText("TigerSec");
+  await expect(page.getByRole("table")).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(competition);
+  await page.goForward();
+  await expect(page).toHaveURL(competition + "/leaderboard");
 });
-test('login failure, signup, profile completion, update and signout', async ({ page, request }) => {
-  await page.goto('/login');
-  await page.getByLabel('Email',{exact:true}).fill('member@ssl.test');
-  await page.getByLabel('Password',{exact:true}).fill('wrong-password');
-  await page.getByRole('button',{name:'Log in',exact:true}).click();
-  await expect(page.getByRole('main').getByRole('alert')).toContainText('Wrong email or password');
-  await page.getByLabel('Email',{exact:true}).fill('incomplete@ssl.test');
-  await page.getByLabel('Password',{exact:true}).fill('correct-password');
-  await page.getByRole('button',{name:'Create account'}).click();
-  await expect(page).toHaveURL('/account');
-  await expect(page.getByText('Complete your profile to access all features.')).toBeVisible();
-  await page.getByLabel('Full Name').fill('Test Member');
-  await page.getByLabel('Username').fill('new_member');
-  await page.getByRole('button',{name:'Save changes'}).click();
-  await expect(page.getByRole('status')).toContainText('Profile updated.');
+test("login failure, signup, profile completion, update and signout", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/login");
+  await page.getByLabel("Email", { exact: true }).fill("member@ssl.test");
+  await page.getByLabel("Password", { exact: true }).fill("wrong-password");
+  await page.getByRole("button", { name: "Log in", exact: true }).click();
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "Wrong email or password",
+  );
+  await page.getByLabel("Email", { exact: true }).fill("incomplete@ssl.test");
+  await page.getByLabel("Password", { exact: true }).fill("correct-password");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page).toHaveURL("/account");
+  await expect(
+    page.getByText("Complete your profile to access all features."),
+  ).toBeVisible();
+  await page.getByLabel("Full Name").fill("Test Member");
+  await page.getByLabel("Username").fill("new_member");
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByRole("status")).toContainText("Profile updated.");
   const state = await (await request.get(`${fixture}/__state`)).json();
-  expect(state.profiles.find(p=>p.id === 'incomplete').username).toBe('new_member');
-  await page.getByRole('button',{name:'Sign out'}).click();
-  await expect(page).toHaveURL('/login');
+  expect(state.profiles.find((p) => p.id === "incomplete").username).toBe(
+    "new_member",
+  );
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await expect(page).toHaveURL("/login");
 });
-test('password reset request, invalid link and successful password update', async ({ page, context, request }) => {
-  await page.goto('/login');
-  await page.getByLabel('Email for reset').fill('member@ssl.test');
-  await page.getByRole('button',{name:'Send reset link'}).click();
-  await expect(page.getByRole('status')).toContainText('a reset link is on the way');
-  await page.goto('/reset-password');
-  await expect(page.getByText('We could not confirm this reset request.')).toBeVisible();
-  await login(context,request);
+test("password reset request, invalid link and successful password update", async ({
+  page,
+  context,
+  request,
+}) => {
+  await page.goto("/login");
+  await page.getByLabel("Email for reset").fill("member@ssl.test");
+  await page.getByRole("button", { name: "Send reset link" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "a reset link is on the way",
+  );
+  await page.goto("/reset-password");
+  await expect(
+    page.getByText("We could not confirm this reset request."),
+  ).toBeVisible();
+  await login(context, request);
   await page.reload();
-  await page.getByLabel('New password',{exact:true}).fill('correct-password');
-  await page.getByLabel('Confirm password').fill('different-password');
-  await page.getByRole('button',{name:'Update password'}).click();
-  await expect(page.getByRole('main').getByRole('alert')).toContainText('Passwords do not match');
-  await page.getByLabel('Confirm password').fill('correct-password');
-  await page.getByRole('button',{name:'Update password'}).click();
-  await expect(page.getByRole('status')).toContainText('Password updated.');
+  await page
+    .getByLabel("New password", { exact: true })
+    .fill("correct-password");
+  await page.getByLabel("Confirm password").fill("different-password");
+  await page.getByRole("button", { name: "Update password" }).click();
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "Passwords do not match",
+  );
+  await page.getByLabel("Confirm password").fill("correct-password");
+  await page.getByRole("button", { name: "Update password" }).click();
+  await expect(page.getByRole("status")).toContainText("Password updated.");
 });
-test('admin guards and event creation, editing and deletion', async ({ page, context, request }) => {
-  await page.goto('/admin'); await expect(page).toHaveURL('/login');
-  await login(context,request); await page.goto('/admin'); await expect(page).toHaveURL('/');
-  await login(context,request,'admin'); await page.goto('/admin/events/new');
-  await page.getByLabel('Title').fill('UI fixture event');
-  await page.locator('[name="starts_at"]').fill('2026-10-01T18:00');
-  await page.getByRole('button',{name:'Create Event'}).click();
-  await expect(page).toHaveURL('/admin/events');
-  const row = page.locator('div.clip-cyber').filter({has:page.getByRole('heading',{name:'UI fixture event'})});
-  await row.getByRole('link',{name:'Edit',exact:true}).click();
-  await page.getByLabel('Title').fill('UI fixture updated');
-  await page.getByRole('button',{name:'Update Event'}).click();
-  await expect(page.getByText('Event updated',{exact:true})).toBeVisible();
-  await page.getByRole('button',{name:'Delete Event'}).click();
-  await page.getByRole('button',{name:'Yes, Delete'}).click();
-  await expect(page).toHaveURL('/admin/events');
-  await expect(page.getByRole('heading',{name:'UI fixture updated'})).toHaveCount(0);
+test("admin guards and event creation, editing and deletion", async ({
+  page,
+  context,
+  request,
+}) => {
+  await page.goto("/admin");
+  await expect(page).toHaveURL("/login");
+  await login(context, request);
+  await page.goto("/admin");
+  await expect(page).toHaveURL("/");
+  await login(context, request, "admin");
+  await page.goto("/admin/events/new");
+  await page.getByLabel("Title").fill("UI fixture event");
+  await page.locator('[name="starts_at"]').fill("2026-10-01T18:00");
+  await page.getByRole("button", { name: "Create Event" }).click();
+  await expect(page).toHaveURL("/admin/events");
+  const row = page
+    .locator("div.clip-cyber")
+    .filter({ has: page.getByRole("heading", { name: "UI fixture event" }) });
+  await row.getByRole("link", { name: "Edit", exact: true }).click();
+  await page.getByLabel("Title").fill("UI fixture updated");
+  await page.getByRole("button", { name: "Update Event" }).click();
+  await expect(page.getByText("Event updated", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Delete Event" }).click();
+  await page.getByRole("button", { name: "Yes, Delete" }).click();
+  await expect(page).toHaveURL("/admin/events");
+  await expect(
+    page.getByRole("heading", { name: "UI fixture updated" }),
+  ).toHaveCount(0);
 });
-test('empty, failed, upcoming, ended, missing images and narrow layouts', async ({ page, context, request }) => {
-  await page.setViewportSize({width:390,height:844});
-  await request.post(`${fixture}/__reset`,{data:{scenario:'empty'}}); await page.goto('/events');
-  await expect(page.getByText('No active competitions',{exact:true})).toBeVisible();
-  await request.post(`${fixture}/__reset`,{data:{scenario:'error'}}); await page.reload();
-  await expect(page.getByRole('main').getByRole('alert').first()).toContainText('Unable to load');
-  await request.post(`${fixture}/__reset`,{data:{scenario:'upcoming'}}); await page.goto(competition);
-  await expect(page.getByText('Locked',{exact:true})).toBeVisible();
-  await request.post(`${fixture}/__reset`,{data:{scenario:'ended'}}); await login(context,request); await page.reload();
-  await page.getByRole('button',{name:/Headers up/}).click();
-  await expect(page.getByText('[COMPETITION NOT ACTIVE]').filter({visible:true})).toBeVisible();
-  await request.post(`${fixture}/__reset`,{data:{scenario:'long'}}); await page.goto('/events');
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.goto('/about'); await expect(page.getByText('Photo coming soon').first()).toBeVisible();
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+test("empty, failed, upcoming, ended, missing images and narrow layouts", async ({
+  page,
+  context,
+  request,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await request.post(`${fixture}/__reset`, { data: { scenario: "empty" } });
+  await page.goto("/events");
+  await expect(
+    page.getByText("No active competitions", { exact: true }),
+  ).toBeVisible();
+  await request.post(`${fixture}/__reset`, { data: { scenario: "error" } });
+  await page.reload();
+  await expect(page.getByRole("main").getByRole("alert").first()).toContainText(
+    "Unable to load",
+  );
+  await request.post(`${fixture}/__reset`, { data: { scenario: "upcoming" } });
+  await page.goto(competition);
+  await expect(page.getByText("Locked", { exact: true })).toBeVisible();
+  await request.post(`${fixture}/__reset`, { data: { scenario: "ended" } });
+  await login(context, request);
+  await page.reload();
+  await page.getByRole("button", { name: /Headers up/ }).click();
+  await expect(
+    page.getByText("[COMPETITION NOT ACTIVE]").filter({ visible: true }),
+  ).toBeVisible();
+  await request.post(`${fixture}/__reset`, { data: { scenario: "long" } });
+  await page.goto("/events");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.goto("/about");
+  await expect(page.getByText("Photo coming soon").first()).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
 });
-test('reduced motion, skip link, and no hydration errors on public pages', async ({ page }) => {
-  const errors=[]; page.on('pageerror',error=>errors.push(error.message));
-  await page.emulateMedia({reducedMotion:'reduce'});
-  await page.goto('/');
-  await page.keyboard.press('Tab');
-  await expect(page.getByRole('link',{name:'Skip to main content'})).toBeFocused();
-  await page.keyboard.press('Enter');
-  expect(await page.locator('.lab-orbit-sweep').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
-  for (const path of ['/events','/about',competition,competition+'/leaderboard','/login','/reset-password','/QR','/error','/missing']) {
-    await page.goto(path); await expect(page.getByRole('main')).toBeVisible();
+test("reduced motion, skip link, and no hydration errors on public pages", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.keyboard.press("Tab");
+  await expect(
+    page.getByRole("link", { name: "Skip to main content" }),
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
+  expect(
+    await page
+      .locator(".lab-orbit-sweep")
+      .evaluate((el) => getComputedStyle(el).animationName),
+  ).toBe("none");
+  for (const path of [
+    "/events",
+    "/about",
+    competition,
+    competition + "/leaderboard",
+    "/login",
+    "/reset-password",
+    "/QR",
+    "/error",
+    "/missing",
+  ]) {
+    await page.goto(path);
+    await expect(page.getByRole("main")).toBeVisible();
   }
   expect(errors).toEqual([]);
 });
-test('preview transitions follow the flag and navigation works without browser support', async ({ page }) => {
-  const errors=[]; page.on('pageerror',e=>errors.push(e.message));
-  await page.addInitScript(()=>{
-    window.transitionCalls=0;
-    const original=document.startViewTransition?.bind(document);
-    if (original) document.startViewTransition=(...args)=>{window.transitionCalls++; return original(...args);};
+test("preview transitions follow the flag and navigation works without browser support", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.addInitScript(() => {
+    window.transitionCalls = 0;
+    const original = document.startViewTransition?.bind(document);
+    if (original)
+      document.startViewTransition = (...args) => {
+        window.transitionCalls++;
+        return original(...args);
+      };
   });
-  await page.goto('/events');
-  await page.locator('.lab-competition-card').first().click();
-  await expect(page.getByRole('heading',{level:1})).toContainText('TigerSec');
-  await page.getByRole('link',{name:/View All/}).click();
-  await expect(page.getByRole('heading',{level:1})).toHaveText('Leaderboard');
-  const calls=await page.evaluate(()=>window.transitionCalls);
-  if (process.env.NEXT_PUBLIC_UI_TRANSITIONS === '1') expect(calls).toBeGreaterThan(0);
+  await page.goto("/events");
+  await page.locator(".lab-competition-card").first().click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "TigerSec",
+  );
+  await page.getByRole("link", { name: /View All/ }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Leaderboard",
+  );
+  const calls = await page.evaluate(() => window.transitionCalls);
+  if (process.env.NEXT_PUBLIC_UI_TRANSITIONS === "1")
+    expect(calls).toBeGreaterThan(0);
   else expect(calls).toBe(0);
-  await page.addInitScript(()=>{document.startViewTransition=undefined;});
-  await page.goto('/events'); await page.locator('.lab-competition-card').first().click();
-  await expect(page.getByRole('heading',{level:1})).toContainText('TigerSec');
+  await page.addInitScript(() => {
+    document.startViewTransition = undefined;
+  });
+  await page.goto("/events");
+  await page.locator(".lab-competition-card").first().click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "TigerSec",
+  );
   expect(errors).toEqual([]);
+});
+
+test("live event promotion, CTF redirect and content without JavaScript", async ({
+  page,
+  browser,
+}) => {
+  await page.goto("/");
+  const promotion = page.getByRole("complementary", {
+    name: "Live event CTF access",
+  });
+  await expect(promotion).toContainText("Inside the attack");
+  await expect(
+    promotion.getByRole("link", { name: /Open CTF/ }),
+  ).toHaveAttribute("href", competition);
+  await page.goto("/ctf");
+  await expect(page).toHaveURL("/events#ctf");
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const staticPage = await context.newPage();
+  await staticPage.goto("http://localhost:3100/");
+  await expect(staticPage.getByRole("heading", { level: 1 })).toContainText(
+    "Stay curious.",
+  );
+  await expect(
+    staticPage.getByRole("heading", { name: "Capture the Flag Team" }),
+  ).toBeVisible();
+  await context.close();
+});
+
+test("secondary admin routes render without changing their workflows", async ({
+  page,
+  context,
+  request,
+}) => {
+  await login(context, request, "admin");
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  for (const route of [
+    "/admin",
+    "/admin/ctf/competitions",
+    "/admin/ctf/competitions/new",
+    "/admin" + competition.replace("/ctf/", "/ctf/competitions/"),
+    "/admin" +
+      competition.replace("/ctf/", "/ctf/competitions/") +
+      "/challenges",
+    "/admin/ctf/submissions",
+  ]) {
+    await page.goto(route);
+    await expect(page.getByRole("main")).toBeVisible();
+    await expect(
+      page.getByText("Something went wrong", { exact: true }),
+    ).toHaveCount(0);
+  }
+  expect(errors).toEqual([]);
+});
+
+test("RON terminal and QR phishing game retain their interactions", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.keyboard.down("r");
+  await page.keyboard.down("o");
+  await page.keyboard.down("n");
+  await expect(
+    page.getByRole("button", { name: "Close terminal" }),
+  ).toBeVisible();
+  await page.keyboard.up("r");
+  await page.keyboard.up("o");
+  await page.keyboard.up("n");
+  await page.locator(".ron-input").fill("help");
+  await page.locator(".ron-input").press("Enter");
+  await expect(page.locator(".ron-history")).toContainText("help");
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("button", { name: "Close terminal" }),
+  ).toHaveCount(0);
+  await page.goto("/QR");
+  await page.getByLabel("Enter your name to begin").scrollIntoViewIfNeeded();
+  const dismiss = page.getByRole("button", { name: /okay, play the game/ });
+  await expect(dismiss).toBeVisible();
+  await dismiss.click();
+  await page.getByLabel("Enter your name to begin").fill("tester");
+  await page.getByRole("button", { name: /Start game/ }).click();
+  await page.getByRole("button", { name: "FAKE", exact: true }).click();
+  await expect(page.getByText("What gives it away?")).toBeVisible();
+  await page
+    .getByRole("button", {
+      name: /The sender domain is not an official LSU domain/,
+    })
+    .click();
+  await expect(page.locator("#phish-feedback")).toContainText("+100");
+});
+
+test("account fields use the server profile without fetching it again in the browser", async ({ page, context, request }) => {
+  await login(context, request);
+  const profileReads = [];
+  page.on("request", (req) => {
+    if (req.method() === "GET" && new URL(req.url()).pathname === "/rest/v1/profiles")
+      profileReads.push(req.url());
+  });
+  await page.goto("/account");
+  await expect(page.getByLabel("Full Name")).toHaveValue("SSL Tester");
+  await expect(page.getByLabel("Username")).toHaveValue("member");
+  await page.getByLabel("Full Name").fill("Updated Member");
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByRole("status")).toContainText("Profile updated.");
+  expect(profileReads).toEqual([]);
+});
+
+test("terminal loads the member identity on demand and ignores editable content", async ({ page, context, request }) => {
+  await login(context, request);
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/");
+  await page.evaluate(() => {
+    const editor = document.createElement("div");
+    editor.contentEditable = "true";
+    editor.id = "test-editor";
+    document.body.append(editor);
+    editor.focus();
+  });
+  for (const key of ["r", "o", "n"]) await page.keyboard.down(key);
+  for (const key of ["r", "o", "n"]) await page.keyboard.up(key);
+  await expect(page.locator(".ron-console-overlay")).toHaveCount(0);
+  await page.evaluate(() => document.getElementById("test-editor").remove());
+  for (const key of ["r", "o", "n"]) await page.keyboard.down(key);
+  for (const key of ["r", "o", "n"]) await page.keyboard.up(key);
+  await expect(page.locator(".ron-input")).toBeVisible();
+  await expect(page.locator(".ron-prompt")).toContainText("member");
+  await expect(page.locator(".ron-console-overlay")).toHaveCSS("position", "fixed");
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".ron-console-overlay")).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("shared deletion controls cancel and delete challenges and competitions", async ({ page, context, request }) => {
+  await login(context, request, "admin");
+  const adminCompetition = "/admin" + competition.replace("/ctf/", "/ctf/competitions/");
+  await page.goto(adminCompetition + "/challenges");
+  await page.locator("details summary").first().click();
+  await page.getByRole("button", { name: "Delete Challenge", exact: true }).first().click();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(page.locator("details")).toHaveCount(3);
+  await page.getByRole("button", { name: "Delete Challenge", exact: true }).first().click();
+  await page.getByRole("button", { name: "Yes", exact: true }).click();
+  await expect(page.locator("details")).toHaveCount(2);
+  await page.goto(adminCompetition);
+  await page.getByRole("button", { name: "Delete Competition", exact: true }).click();
+  await page.getByRole("button", { name: "Yes, Delete", exact: true }).click();
+  await expect(page).toHaveURL("/admin/ctf/competitions");
+  await expect(page.getByText("No competitions yet.")).toBeVisible();
 });

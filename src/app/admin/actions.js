@@ -1,30 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { createClient } from '../../../utils/supabase/server'
-
-// Helper to check admin status
-async function requireAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new Error('Not authenticated')
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_admin')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile?.is_admin) {
-    throw new Error('Not authorized')
-  }
-
-  return { supabase, user }
-}
+import { requireAdmin } from '../../../utils/auth/requireAdmin'
 
 // Helper to verify competition access (owner, collaborator, or admin)
 async function verifyCompetitionAccess(supabase, competitionId, userId, requiredRole = 'editor') {
