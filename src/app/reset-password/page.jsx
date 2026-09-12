@@ -165,9 +165,9 @@ function ResetPasswordContent() {
               <button
                 type="submit"
                 className="lab-button lab-button--primary w-full"
-                disabled={loading}
+                disabled={loading || checking || !sessionReady}
               >
-                {loading ? "Updating..." : "Update password"}
+                {checking ? "Checking session..." : loading ? "Updating..." : "Update password"}
               </button>
               <Link
                 href="/login"

@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useState, useRef } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createEvent, updateEvent } from '@/app/admin/events/actions'
 
@@ -119,11 +120,11 @@ export default function EventForm({ event, competitions = [], competitionsError 
 
       {/* Title */}
       <div>
-        <label className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+        <label htmlFor="event-title" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
           Title *
         </label>
         <input
-          name="title"
+          id="event-title" name="title"
           type="text"
           required
           maxLength={200}
@@ -135,11 +136,11 @@ export default function EventForm({ event, competitions = [], competitionsError 
 
       {/* Description */}
       <div>
-        <label className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+        <label htmlFor="event-description" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
           Description
         </label>
         <textarea
-          name="description"
+          id="event-description" name="description"
           rows={3}
           defaultValue={event?.description || ''}
           placeholder="Event details and what to expect..."
@@ -149,14 +150,14 @@ export default function EventForm({ event, competitions = [], competitionsError 
 
       {/* Event Image */}
       <div>
-        <label className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+        <label htmlFor="event-image" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
           Event Image
         </label>
 
         {/* Image Preview */}
         {(imagePreview || (existingImageUrl && !removeImage)) && (
           <div className="relative mb-3 overflow-hidden rounded-lg border border-purple-900/60">
-            <img
+            <Image width={1200} height={400} unoptimized
               src={imagePreview || existingImageUrl}
               alt="Event preview"
               className="h-48 w-full object-cover"
@@ -173,6 +174,7 @@ export default function EventForm({ event, competitions = [], competitionsError 
 
         {/* File Input */}
         <input
+          id="event-image"
           ref={fileInputRef}
           type="file"
           name="image"
@@ -194,11 +196,11 @@ export default function EventForm({ event, competitions = [], competitionsError 
 
       {/* Location */}
       <div>
-        <label className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+        <label htmlFor="event-location" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
           Location
         </label>
         <input
-          name="location"
+          id="event-location" name="location"
           type="text"
           defaultValue={event?.location || ''}
           placeholder="PFT 1200 or Virtual (Discord)"
@@ -241,11 +243,11 @@ export default function EventForm({ event, competitions = [], competitionsError 
 
       {/* Timezone */}
       <div>
-        <label className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+        <label htmlFor="event-timezone" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
           Timezone
         </label>
         <select
-          name="timezone"
+          id="event-timezone" name="timezone"
           defaultValue={defaultTz}
           className="w-full rounded-lg border border-purple-900/60 bg-black/60 px-4 py-3 text-white focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
         >
@@ -260,11 +262,11 @@ export default function EventForm({ event, competitions = [], competitionsError 
       {/* Start and End Dates */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+          <label htmlFor="event-starts_at" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
             Start Date/Time *
           </label>
           <input
-            name="starts_at"
+            id="event-starts_at" name="starts_at"
             type="datetime-local"
             required
             defaultValue={formatDateForInput(event?.starts_at, defaultTz)}
@@ -272,11 +274,11 @@ export default function EventForm({ event, competitions = [], competitionsError 
           />
         </div>
         <div>
-          <label className="mb-2 block font-terminal text-xs uppercase text-slate-400">
+          <label htmlFor="event-ends_at" className="mb-2 block font-terminal text-xs uppercase text-slate-400">
             End Date/Time
           </label>
           <input
-            name="ends_at"
+            id="event-ends_at" name="ends_at"
             type="datetime-local"
             required={Boolean(competitionId)}
             defaultValue={formatDateForInput(event?.ends_at, defaultTz)}
