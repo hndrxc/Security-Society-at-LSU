@@ -132,6 +132,15 @@ h4 {
   gap: 12px;
   min-width: 0;
 }
+.lab-nav-logo {
+  width: 60px;
+  height: auto;
+  flex-shrink: 0;
+  transition: opacity 0.2s var(--ease-out);
+}
+.lab-brand:hover .lab-nav-logo {
+  opacity: 0.85;
+}
 .lab-brand strong {
   display: block;
   font-size: 14px;
@@ -1484,12 +1493,8 @@ h4 {
   .lab-brand {
     gap: 12px;
   }
-  .lab-brand .lab-nav-logo {
-    /* Override the badge's inline default only in the desktop navbar. */
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 10px;
-    flex-shrink: 0;
+  .lab-nav-logo {
+    width: 78px;
   }
   .lab-brand strong {
     font-size: 14px;

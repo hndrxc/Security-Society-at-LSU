@@ -1,5 +1,5 @@
 import Link from "next/link";
-import LogoBadge from "@/components/LogoBadge";
+import Image from "next/image";
 import MobileNavigation from "./MobileNavigation";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -23,9 +23,11 @@ export default function Navbar({ user, profile, currentPath = "/" }) {
           className="lab-brand"
           aria-label="Security Society at LSU home"
         >
-          <LogoBadge
-            size={38}
-            sizes="(min-width: 900px) 40px, 38px"
+          <Image
+            src="/SSL-banner.webp"
+            alt=""
+            width={68}
+            height={34}
             className="lab-nav-logo"
             priority
           />
