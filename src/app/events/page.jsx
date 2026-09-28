@@ -12,6 +12,7 @@ import {
 import Reveal from "@/components/ui/Reveal";
 import { createClient } from "../../../utils/supabase/server";
 import { getAuthData } from "../../../utils/auth/getAuthData";
+import styles from "./events.module.css";
 
 export const revalidate = 60;
 
@@ -156,7 +157,7 @@ export default async function EventsPage() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   return (
-    <PageShell user={user} profile={profile} currentPath="/events">
+    <PageShell user={user} profile={profile} currentPath="/events" className={styles.page}>
       <PageHeading
         eyebrow="01 / Operations hub"
         title="Upcoming Operations"
