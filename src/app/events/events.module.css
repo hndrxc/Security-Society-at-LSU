@@ -1,10 +1,5 @@
 @media (max-width: 760px) {
-  /* Keep the headings and useful event details; hide repeated decoration. */
-  .page :global(.lab-heading .lab-eyebrow),
-  .page :global(.lab-heading > .lab-badge),
-  .page :global(.lab-section-title .lab-eyebrow),
-  .page :global(.lab-section-title .lab-muted),
-  .page :global(.lab-competition-card .lab-card-top .lab-eyebrow),
+  /* The meta line already includes START/END; hide the repeated date column. */
   .page :global(.lab-event-date) {
     display: none;
   }
@@ -18,14 +13,6 @@
     margin-top: 0;
   }
 
-  .page :global(.lab-section-nav) {
-    margin-bottom: 24px;
-  }
-
-  .page :global(.lab-section-title) {
-    margin: 28px 0 16px;
-  }
-
   .page :global(.lab-event) {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -33,9 +20,5 @@
   .page :global(.lab-event-meta) {
     flex-direction: column;
     gap: 4px;
-  }
-
-  .page :global(.lab-competition-card) {
-    gap: 16px;
   }
 }

@@ -80,6 +80,12 @@ function reset(mode = "normal") {
     db.events = [];
     db.ctf_competitions = [];
   }
+  if (mode === "upcoming-event") {
+    db.events[0].starts_at = end;
+    db.events[0].ends_at = new Date(
+      Date.now() + 86400000 + 7200000,
+    ).toISOString();
+  }
 }
 function user(id) {
   return {

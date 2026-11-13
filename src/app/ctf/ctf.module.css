@@ -1,0 +1,14 @@
+@media (max-width: 760px) {
+  .page :global(.lab-heading) {
+    margin-top: 0;
+    margin-bottom: 24px;
+  }
+
+  .page :global(.lab-heading h1) {
+    margin-top: 0;
+  }
+
+  .page :global(.lab-competition-card) {
+    gap: 16px;
+  }
+}

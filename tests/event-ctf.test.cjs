@@ -54,6 +54,7 @@ function load(file, mocks = {}) {
     require: (name) => {
       if (Object.hasOwn(mocks, name)) return mocks[name];
       if (name === "@/components/ui/Reveal") return ({ children }) => children;
+      if (name.endsWith(".css")) return {};
       if (name.startsWith("@/") || name.startsWith(".")) {
         let target = name.startsWith("@/")
           ? path.join("src", name.slice(2))
@@ -272,35 +273,143 @@ test("unlinked or hidden CTF events cannot crowd out the earliest eligible event
   assert.equal((await helpers.getLiveCtfEvent(client, now)).data.id, event.id);
 });
 
+async function render(file, client) {
+  return renderToStaticMarkup(await load(file, pageMocks(client)).default());
+}
+
 test("homepage stays available when the migration is pending or event lookup fails", async () => {
-  for (const options of [{ missingColumn: true }, { queryError: true }]) {
-    const { client } = database(options);
-    const html = renderToStaticMarkup(
-      await load("src/app/page.jsx", pageMocks(client)).default(),
-    );
-    assert.doesNotMatch(html, /Live event CTF access/);
-    assert.match(html, /Hello member!/);
-  }
+  const pending = await render(
+    "src/app/page.jsx",
+    database({ missingColumn: true }).client,
+  );
+  assert.match(pending, /aria-label="Featured event"/);
+  assert.match(pending, /Happening now/);
+  assert.match(pending, /href="\/ctf"/);
+  assert.doesNotMatch(pending, new RegExp(`href="/ctf/${competitionId}"`));
+  assert.match(pending, /Hello member!/);
+
+  const failing = await render(
+    "src/app/page.jsx",
+    database({ queryError: true }).client,
+  );
+  assert.doesNotMatch(failing, /Featured event/);
+  assert.match(failing, /Hello member!/);
 });
 
-test("event listing links visible attached CTFs and survives a pending migration", async () => {
+test("homepage features the next upcoming event with its start time and all-events link", async () => {
+  const html = await render(
+    "src/app/page.jsx",
+    database({
+      events: [
+        {
+          ...event,
+          starts_at: "2026-09-13T00:00:00Z",
+          ends_at: "2026-09-13T02:00:00Z",
+          timezone: "America/Chicago",
+        },
+      ],
+    }).client,
+  );
+  assert.match(html, /Next event/);
+  assert.match(html, /Live workshop/);
+  assert.match(html, /href="\/events"/);
+  assert.match(html, /Sep 12, 2026/);
+  assert.doesNotMatch(html, /Open CTF/);
+});
+
+test("a live featured event without a linked competition opens the CTF directory", async () => {
+  const html = await render(
+    "src/app/page.jsx",
+    database({ events: [{ ...event, ctf_competition_id: null }] }).client,
+  );
+  assert.match(html, /Happening now/);
+  assert.match(html, /href="\/ctf"/);
+  assert.doesNotMatch(html, new RegExp(`href="/ctf/${competitionId}"`));
+});
+
+test("the earliest current event is featured even when another live event links a CTF", async () => {
+  const html = await render(
+    "src/app/page.jsx",
+    database({
+      events: [
+        {
+          ...event,
+          id: "a-unlinked",
+          starts_at: "2026-09-11T22:00:00Z",
+          ctf_competition_id: null,
+        },
+        event,
+      ],
+    }).client,
+  );
+  assert.match(html, /Happening now/);
+  assert.match(html, /href="\/ctf"/);
+  assert.doesNotMatch(html, new RegExp(`href="/ctf/${competitionId}"`));
+});
+
+test("homepage omits the featured card when no upcoming events remain", async () => {
+  const html = await render(
+    "src/app/page.jsx",
+    database({ events: [] }).client,
+  );
+  assert.doesNotMatch(html, /Featured event/);
+  assert.match(html, /Hello member!/);
+});
+
+test("homepage CTF action links to the directory when no Discord invite is configured", async () => {
+  const html = await render("src/app/page.jsx", database().client);
+  assert.match(html, /<a[^>]*href="\/ctf"[^>]*>View CTFs<\/a>/);
+  assert.doesNotMatch(html, /Join Discord/);
+});
+
+test("event listing links visible attached CTFs and stays a club-events page", async () => {
   for (const options of [{}, { missingColumn: true }]) {
-    const { client } = database(options);
-    const html = renderToStaticMarkup(
-      await load("src/app/events/page.jsx", pageMocks(client)).default(),
+    const html = await render(
+      "src/app/events/page.jsx",
+      database(options).client,
     );
     assert.match(html, /Live workshop/);
     assert.doesNotMatch(html, /Unable to load events/);
+    assert.doesNotMatch(html, /CTF Competitions/);
+    assert.doesNotMatch(html, /Enter competition/);
     if (!options.missingColumn) assert.match(html, /View CTF: Attached CTF/);
     else assert.doesNotMatch(html, /View CTF:/);
   }
-  const { client } = database({
-    competitions: [{ ...competition, is_active: false }],
-  });
-  const html = renderToStaticMarkup(
-    await load("src/app/events/page.jsx", pageMocks(client)).default(),
+  const hidden = await render(
+    "src/app/events/page.jsx",
+    database({ competitions: [{ ...competition, is_active: false }] }).client,
   );
-  assert.doesNotMatch(html, /View CTF:/);
+  assert.doesNotMatch(hidden, /View CTF:/);
+});
+
+test("event listing shows an empty state without a competition directory", async () => {
+  const html = await render(
+    "src/app/events/page.jsx",
+    database({ events: [] }).client,
+  );
+  assert.match(html, /No upcoming events\. Check back soon\./);
+  assert.doesNotMatch(html, /CTF Competitions/);
+  assert.doesNotMatch(html, /Enter competition/);
+});
+
+test("CTF directory lists active competitions with status and challenge counts", async () => {
+  const html = await render("src/app/ctf/page.jsx", database().client);
+  assert.match(html, /CTF Competitions/);
+  assert.match(html, /Attached CTF/);
+  assert.match(html, new RegExp(`href="/ctf/${competitionId}"`));
+  assert.match(html, /0 challenges/);
+  assert.match(html, /ACTIVE/);
+  assert.match(html, /to submit flags and track your progress\./);
+  assert.doesNotMatch(html, /CTF \/ 01/);
+});
+
+test("CTF directory shows an empty state without active competitions", async () => {
+  const html = await render(
+    "src/app/ctf/page.jsx",
+    database({ competitions: [] }).client,
+  );
+  assert.match(html, /No active competitions\. Check back soon\./);
+  assert.doesNotMatch(html, /Attached CTF/);
 });
 
 test("link validation supports attach, detach, hidden competitions, and disabled selectors", async () => {
