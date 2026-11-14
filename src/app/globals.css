@@ -550,53 +550,23 @@ h4 {
   margin-top: 6px;
   overflow-wrap: anywhere;
 }
-.lab-live {
+.lab-featured {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 24px;
   margin-top: 28px;
+}
+.lab-live {
   border-color: #4c604c;
   background: linear-gradient(105deg, #1a2a23, #13191a);
 }
-.lab-live h2 {
+.lab-featured h2 {
   font-size: 22px;
   margin: 12px 0 4px;
 }
-.lab-program-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: 24px;
-}
-.lab-programs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.lab-program {
-  display: block;
-  height: 100%;
-  padding: 24px;
-  transition:
-    border-color 0.25s,
-    transform 0.3s var(--ease-out);
-}
-.lab-program:hover {
-  border-color: var(--accent-purple);
-  transform: translateY(-4px);
-}
-.lab-program .lab-eyebrow {
-  display: flex;
-  justify-content: space-between;
-}
-.lab-program h3 {
-  margin: 32px 0 12px;
-  font-size: 20px;
-  letter-spacing: -0.03em;
-}
-.lab-program p:not(.lab-eyebrow) {
-  color: var(--muted);
-  font-size: 13px;
+.lab-discord {
+  margin-top: 28px;
 }
 .lab-discord h2 {
   font-size: 28px;
@@ -609,15 +579,6 @@ h4 {
   height: 300px;
   margin-top: 24px;
   border-radius: 8px;
-}
-.lab-discord .lab-actions {
-  margin-top: 24px;
-}
-.lab-section-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 36px;
 }
 .lab-timeline {
   display: grid;
@@ -1012,9 +973,6 @@ h4 {
   .lab-hero {
     gap: 24px;
   }
-  .lab-program-layout {
-    grid-template-columns: 1fr;
-  }
   .lab-auth {
     gap: 36px;
   }
@@ -1064,7 +1022,7 @@ h4 {
   .lab-meeting-strip > div:last-child {
     grid-column: 1/-1;
   }
-  .lab-live {
+  .lab-featured {
     flex-direction: column;
     align-items: start;
   }
@@ -1124,8 +1082,7 @@ h4 {
   }
 }
 @media (max-width: 460px) {
-  .lab-officers,
-  .lab-programs {
+  .lab-officers {
     grid-template-columns: 1fr;
   }
   .lab-portrait {

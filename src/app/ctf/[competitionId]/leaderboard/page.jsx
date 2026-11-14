@@ -44,7 +44,7 @@ export default async function LeaderboardPage({ params }) {
     <PageShell user={user} profile={profile} currentPath="/ctf" wide>
       <Breadcrumbs
         items={[
-          { label: "Events", href: "/events#ctf" },
+          { label: "All competitions", href: "/ctf" },
           { label: competition.title, href: `/ctf/${competitionId}` },
           { label: "Leaderboard" },
         ]}

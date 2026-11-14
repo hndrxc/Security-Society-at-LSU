@@ -23,7 +23,7 @@ export function PageHeading({
   return (
     <div className="lab-heading">
       <div>
-        <p className="lab-eyebrow">{eyebrow}</p>
+        {eyebrow && <p className="lab-eyebrow">{eyebrow}</p>}
         {transitionName ? (
           <TransitionRegion name={transitionName} kind="lab-shared">
             <h1>{title}</h1>

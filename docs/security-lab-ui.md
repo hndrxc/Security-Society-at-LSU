@@ -42,6 +42,7 @@ NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54329 \
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=fixture-key \
 NEXT_PUBLIC_SITE_URL=http://localhost:3100 \
 NEXT_PUBLIC_DISCORD_SERVER_ID= \
+NEXT_PUBLIC_DISCORD_INVITE=https://discord.gg/fixture \
 NEXT_PUBLIC_UI_TRANSITIONS=0 npm run build
 UI_PRODUCTION=1 NEXT_PUBLIC_UI_TRANSITIONS=0 npm run test:ui
 ```
@@ -59,7 +60,7 @@ Validation passed:
 - Production builds with View Transitions [disabled](../artifacts/ui/build-off.txt) and [enabled](../artifacts/ui/build-on.txt).
 - All 12 browser scenarios in each production configuration: [disabled, 18.0 seconds](../artifacts/ui/browser-tests-off.txt) and [enabled, 19.7 seconds](../artifacts/ui/browser-tests-on.txt). [Browser report](../artifacts/ui/report/index.html)
 
-Browser coverage includes mobile focus restoration, keyboard and reduced-motion behavior, CTF filters and retained drafts/hints, server-confirmed flag outcomes, breadcrumbs and history, signup/login/reset/profile flows, admin guards and event mutations, secondary admin routes, RON and QR interactions, unavailable content, missing images, narrow layouts, and unsupported View Transitions. Authentication and mutation checks use isolated fixtures as described above.
+Browser coverage includes mobile focus restoration, keyboard and reduced-motion behavior, the `/ctf` directory, the featured event in live, upcoming, absent, and error states, CTF filters and retained drafts/hints, server-confirmed flag outcomes, breadcrumbs and history, signup/login/reset/profile flows, admin guards and event mutations, secondary admin routes, RON and QR interactions, unavailable content, missing images, narrow layouts, 1280×800 and 375×812 layout checks, and unsupported View Transitions. Authentication and mutation checks use isolated fixtures as described above.
 
 Open the [before/after gallery](../artifacts/ui/index.html) to compare 11 pages at desktop (1440px), tablet (834px), and mobile (390px) widths. The 66 screenshots include competition detail, leaderboard, account, admin event editing, and QR. All use isolated fixture data; unavailable officer portraits demonstrate the fallback.
 
@@ -73,4 +74,4 @@ The following values are medians of three fresh browser contexts per page agains
 
 The new presentation and interaction dependencies add 33–44 KB in this measurement. Loading the mobile dialog on demand removed approximately 24 KB from the first implementation. These local timings are too small and environment-dependent to establish a user-facing speed improvement; the useful comparison is the measured JavaScript cost and absence of layout shifts in these runs.
 
-Git operations and PR delivery are paused at the user's request. No production deployment is included.
+No production deployment is included.

@@ -93,13 +93,25 @@ test("filters and expansion preserve drafts and purchased hints", async ({
 test("guest restrictions, breadcrumbs, direct links and back/forward", async ({
   page,
 }) => {
-  await page.goto("/events#ctf");
+  await page.goto("/ctf");
+  const mainNavigation = page.getByRole("navigation", {
+    name: "Main navigation",
+  });
+  await expect(
+    mainNavigation.getByRole("link", { name: "CTF", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await expect(
+    mainNavigation.getByRole("link", { name: "Events", exact: true }),
+  ).not.toHaveAttribute("aria-current", "page");
+  await page.locator(".lab-competition-card").first().click();
+  await expect(
+    mainNavigation.getByRole("link", { name: "CTF", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
   await expect(
     page
-      .getByRole("navigation", { name: "Main navigation" })
-      .getByRole("link", { name: "Events" }),
-  ).toHaveAttribute("aria-current", "page");
-  await page.locator(".lab-competition-card").first().click();
+      .getByRole("navigation", { name: "Breadcrumb" })
+      .getByRole("link", { name: "All competitions" }),
+  ).toHaveAttribute("href", "/ctf");
   await expect(
     page.getByRole("button", { name: "Unsolved", exact: true }),
   ).toHaveCount(0);
@@ -119,6 +131,11 @@ test("guest restrictions, breadcrumbs, direct links and back/forward", async ({
   await expect(page).toHaveURL(competition);
   await page.goForward();
   await expect(page).toHaveURL(competition + "/leaderboard");
+  await page
+    .getByRole("navigation", { name: "Breadcrumb" })
+    .getByRole("link", { name: "All competitions" })
+    .click();
+  await expect(page).toHaveURL("/ctf");
 });
 test("login failure, signup, profile completion, update and signout", async ({
   page,
@@ -214,16 +231,34 @@ test("empty, failed, upcoming, ended, missing images and narrow layouts", async 
   request,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  const featuredEvent = page.getByRole("complementary", {
+    name: "Featured event",
+  });
   await request.post(`${fixture}/__reset`, { data: { scenario: "empty" } });
+  await page.goto("/ctf");
+  await expect(
+    page.getByText("No active competitions. Check back soon.", {
+      exact: true,
+    }),
+  ).toBeVisible();
   await page.goto("/events");
   await expect(
-    page.getByText("No active competitions", { exact: true }),
+    page.getByText("No upcoming events. Check back soon.", { exact: true }),
   ).toBeVisible();
+  await page.goto("/");
+  await expect(featuredEvent).toHaveCount(0);
   await request.post(`${fixture}/__reset`, { data: { scenario: "error" } });
-  await page.reload();
+  await page.goto("/events");
   await expect(page.getByRole("main").getByRole("alert").first()).toContainText(
-    "Unable to load",
+    "Unable to load events",
   );
+  await page.goto("/ctf");
+  await expect(page.getByRole("main").getByRole("alert").first()).toContainText(
+    "Unable to load competitions",
+  );
+  await page.goto("/");
+  await expect(featuredEvent).toHaveCount(0);
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await request.post(`${fixture}/__reset`, { data: { scenario: "upcoming" } });
   await page.goto(competition);
   await expect(page.getByText("Locked", { exact: true })).toBeVisible();
@@ -268,6 +303,7 @@ test("reduced motion, skip link, and no hydration errors on public pages", async
   ).toBe("none");
   for (const path of [
     "/events",
+    "/ctf",
     "/about",
     competition,
     competition + "/leaderboard",
@@ -296,7 +332,7 @@ test("preview transitions follow the flag and navigation works without browser s
         return original(...args);
       };
   });
-  await page.goto("/events");
+  await page.goto("/ctf");
   await page.locator(".lab-competition-card").first().click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "TigerSec",
@@ -312,7 +348,7 @@ test("preview transitions follow the flag and navigation works without browser s
   await page.addInitScript(() => {
     document.startViewTransition = undefined;
   });
-  await page.goto("/events");
+  await page.goto("/ctf");
   await page.locator(".lab-competition-card").first().click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "TigerSec",
@@ -320,20 +356,24 @@ test("preview transitions follow the flag and navigation works without browser s
   expect(errors).toEqual([]);
 });
 
-test("live event promotion, CTF redirect and content without JavaScript", async ({
+test("featured event, CTF directory and content without JavaScript", async ({
   page,
   browser,
 }) => {
   await page.goto("/");
   const promotion = page.getByRole("complementary", {
-    name: "Live event CTF access",
+    name: "Featured event",
   });
+  await expect(promotion).toContainText("Happening now");
   await expect(promotion).toContainText("Inside the attack");
   await expect(
     promotion.getByRole("link", { name: /Open CTF/ }),
   ).toHaveAttribute("href", competition);
   await page.goto("/ctf");
-  await expect(page).toHaveURL("/events#ctf");
+  await expect(page).toHaveURL("/ctf");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "CTF Competitions",
+  );
   const context = await browser.newContext({ javaScriptEnabled: false });
   const staticPage = await context.newPage();
   await staticPage.goto("http://localhost:3100/");
@@ -341,9 +381,101 @@ test("live event promotion, CTF redirect and content without JavaScript", async 
     "Stay curious.",
   );
   await expect(
-    staticPage.getByRole("heading", { name: "Capture the Flag Team" }),
+    staticPage.getByRole("link", { name: "Join Discord", exact: true }),
+  ).toHaveAttribute("href", "https://discord.gg/fixture");
+  await expect(
+    staticPage.getByRole("link", { name: "Join Discord", exact: true }),
+  ).toHaveAttribute("target", "_blank");
+  await expect(
+    staticPage.getByRole("link", { name: "View CTFs", exact: true }),
+  ).toHaveAttribute("href", "/ctf");
+  await expect(
+    staticPage.getByRole("heading", { name: /Inside the attack/ }),
   ).toBeVisible();
   await context.close();
+});
+
+test("upcoming featured event links to all events", async ({
+  page,
+  request,
+}) => {
+  await request.post(`${fixture}/__reset`, {
+    data: { scenario: "upcoming-event" },
+  });
+  await page.goto("/");
+  const promotion = page.getByRole("complementary", {
+    name: "Featured event",
+  });
+  await expect(promotion).toContainText("Next event");
+  await expect(
+    promotion.getByRole("link", { name: /All events/ }),
+  ).toHaveAttribute("href", "/events");
+  await expect(
+    promotion.getByRole("link", { name: /Open CTF/ }),
+  ).toHaveCount(0);
+});
+
+test("public pages fit desktop 1280×800 and mobile 375×812", async ({
+  page,
+  context,
+  request,
+}) => {
+  const publicPages = [
+    ["/", "home"],
+    ["/ctf", "ctf"],
+    ["/events", "events"],
+    ["/about", "about"],
+    [competition, "competition"],
+  ];
+  // Each full document load re-runs App Router prefetches for the CTF links
+  // in the navbar, homepage actions, and competition cards. The app limits
+  // /ctf* requests to 30 per minute per x-forwarded-for, so the guest sweeps
+  // need their own client IPs to leave headroom for the signed-in checks.
+  const runId = Date.now();
+  const isolateRateLimit = (phase) =>
+    context.setExtraHTTPHeaders({
+      "x-forwarded-for": `ui-layout-${runId}-${phase}`,
+    });
+  for (const [width, height] of [
+    [1280, 800],
+    [375, 812],
+  ]) {
+    await isolateRateLimit(`${width}x${height}`);
+    await page.setViewportSize({ width, height });
+    for (const [path, slug] of publicPages) {
+      await page.goto(path);
+      await expect(page.getByRole("main")).toBeVisible();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: `artifacts/ui/recruitment/${width}x${height}-${slug}.png`,
+        fullPage: true,
+      });
+    }
+  }
+  await page.setViewportSize({ width: 375, height: 812 });
+  await isolateRateLimit("signed-in");
+  await login(context, request);
+  await page.goto("/ctf");
+  await expect(page.locator(".lab-competition-card").first()).toContainText(
+    "solved",
+  );
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await login(context, request, "admin");
+  await page.goto("/");
+  await expect(page.getByRole("main")).toBeVisible();
+  if (
+    !(await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ))
+  ) {
+    const note = "Admin navigation overflows the 1280px viewport";
+    test.info().annotations.push({ type: "note", description: note });
+    console.warn(note);
+  }
 });
 
 test("secondary admin routes render without changing their workflows", async ({

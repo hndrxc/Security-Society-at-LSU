@@ -19,7 +19,9 @@ The official web platform for the Security Society at LSU. It combines club info
 
 ### Public club experience
 
-- Combined events and CTF hub at `/events`
+- Recruitment-first homepage with Discord and CTF actions plus a featured event
+- Club events at `/events`
+- CTF directory at `/ctf`, linked from the navbar
 - Timezone-aware event listings with optional banner images
 - About page with officer profiles loaded from Supabase Storage
 - Optional Discord server preview and invite link
@@ -77,9 +79,9 @@ The official web platform for the Security Society at LSU. It combines club info
 
 | Route | Purpose |
 | --- | --- |
-| `/` | Club landing page and meeting information |
-| `/events` | Upcoming club events and CTF competitions |
-| `/ctf` | Redirects to the CTF section of `/events` |
+| `/` | Recruitment-focused landing page with Discord/CTF actions and the next event |
+| `/events` | Upcoming club events |
+| `/ctf` | Active CTF competition directory |
 | `/ctf/[competitionId]` | Competition challenges, progress, and leaderboard preview |
 | `/ctf/[competitionId]/leaderboard` | Full competition leaderboard |
 | `/about` | Club information and officer profiles |
@@ -96,8 +98,8 @@ src/
 ├── app/                       # App Router pages, layouts, route handlers, and server actions
 │   ├── admin/                 # Protected administration console
 │   ├── auth/                  # Email confirmation and sign-out handlers
-│   ├── ctf/                   # Competition detail, leaderboard, and CTF actions
-│   ├── events/                # Combined public events and CTF hub
+│   ├── ctf/                   # Competition directory, detail, leaderboard, and CTF actions
+│   ├── events/                # Upcoming club event listings
 │   └── QR/                    # Phishing-awareness exercise
 ├── components/
 │   ├── admin/                 # Admin forms and controls
@@ -108,6 +110,7 @@ src/
 
 utils/
 ├── auth/                      # Server-side auth/profile guards
+├── events/                    # Visible-event query, live-CTF lookup, date formatting
 └── supabase/                  # Browser, server, and middleware clients
 
 supabase/
@@ -200,7 +203,7 @@ Migration 011 adds nullable `events.ctf_competition_id`, referencing `ctf_compet
 
 In **Admin → Events → New/Edit**, select an optional CTF competition and provide an end time after the event starts. Hidden competitions can be attached in advance but their public links appear only after the competition is made visible. Choose **No CTF attached** to remove the link.
 
-The homepage promotes the visible, currently live event with a visible linked CTF that ends soonest. Its **Open CTF** button opens `/ctf/[competitionId]` directly. The events listing also shows each available linked CTF, including for upcoming events. The event schedule controls the homepage promotion; competition schedules still control submissions. Linking an event does not change competition permissions or submission times. The banner is evaluated when the homepage is rendered; an already-open page needs a refresh to reflect schedule changes.
+The homepage features the first visible current or upcoming event by start time. While that event is live, the card shows **Open CTF**, which goes to `/ctf/[competitionId]` when the event links a visible competition and to `/ctf` otherwise. An upcoming event shows its start time and **All events**. The events listing also shows each available linked CTF, including for upcoming events. The event schedule controls the featured card; competition schedules still control submissions. Linking an event does not change competition permissions or submission times. The featured card is evaluated when the homepage is rendered; an already-open page needs a refresh to reflect schedule changes.
 
 Run `npm test` for event/CTF regression checks and `npm run build` for the production build.
 

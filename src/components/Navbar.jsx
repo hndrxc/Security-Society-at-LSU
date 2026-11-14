@@ -3,7 +3,8 @@ import Image from "next/image";
 import MobileNavigation from "./MobileNavigation";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/events", label: "Events", aliases: ["/ctf"] },
+  { href: "/events", label: "Events" },
+  { href: "/ctf", label: "CTF" },
   { href: "/kernels", label: "Kernels" },
   { href: "/about", label: "About" },
 ];
@@ -38,7 +39,7 @@ export default function Navbar({ user, profile, currentPath = "/" }) {
           </div>
         </Link>
         <nav className="lab-desktop-nav" aria-label="Main navigation">
-          {links.map(({ href, label, aliases = [] }) => (
+          {links.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
@@ -47,10 +48,7 @@ export default function Navbar({ user, profile, currentPath = "/" }) {
                 (
                   href === "/"
                     ? currentPath === "/"
-                    : [href, ...aliases].some(
-                        (p) =>
-                          currentPath === p || currentPath.startsWith(p + "/"),
-                      )
+                    : currentPath === href || currentPath.startsWith(href + "/")
                 )
                   ? "page"
                   : undefined

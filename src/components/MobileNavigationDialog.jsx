@@ -29,7 +29,7 @@ export default function MobileNavigationDialog({
             Explore the society.
           </Dialog.Description>
           <nav aria-label="Mobile navigation">
-            {links.map(({ href, label, aliases = [] }) => (
+            {links.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
@@ -38,11 +38,8 @@ export default function MobileNavigationDialog({
                   (
                     href === "/"
                       ? currentPath === "/"
-                      : [href, ...aliases].some(
-                          (p) =>
-                            currentPath === p ||
-                            currentPath.startsWith(p + "/"),
-                        )
+                      : currentPath === href ||
+                        currentPath.startsWith(href + "/")
                   )
                     ? "page"
                     : undefined
